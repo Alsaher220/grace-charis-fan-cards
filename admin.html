@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Fan Card Manager</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .admin-section {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .admin-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+        }
+
+        .message {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .user-list {
+            max-height: 400px;
+            overflow-y: auto;
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+
+        .user-item {
+            padding: 15px;
+            background: white;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .user-name {
+            font-weight: bold;
+            color: #333;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .user-date {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 10px;
+        }
+
+        .user-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .user-actions button {
+            padding: 8px 15px;
+            font-size: 13px;
+            width: auto;
+            flex: 1;
+            min-width: 100px;
+        }
+
+        .view-btn {
+            background: #667eea;
+        }
+
+        .copy-link-btn {
+            background: #28a745;
+        }
+
+        .delete-btn {
+            background: #dc3545;
+        }
+
+        .stats {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            flex: 1;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 28px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="admin-section">
+            <div class="admin-header">
+                <h1>🔐 Admin Panel</h1>
+                <p style="font-size: 14px; opacity: 0.9;">Grace Charis Fan Card Manager</p>
+            </div>
+            
+            <div id="messageBox"></div>
+
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="fanCount">0</div>
+                    <div class="stat-label">Total Fans</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="todayCount">0</div>
+                    <div class="stat-label">Registered Today</div>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label for="celebrityName">Celebrity Name:</label>
+                <input type="text" id="celebrityName" placeholder="Enter celebrity name" value="Grace Charis">
+            </div>
+
+            <div class="input-group">
+                <label for="celebrityPhoto">Celebrity Photo URL:</label>
+                <input type="text" id="celebrityPhoto" placeholder="https://example.com/photo.jpg">
+                <small style="color: #666; display: block; margin-top: 5px;">
+                    Current photo will show on all fan cards
+                </small>
+            </div>
+
+            <div class="input-group">
+                <label for="fanName">Fan Name:</label>
+                <input type="text" id="fanName" placeholder="Enter fan name to register">
+            </div>
+
+            <button onclick="registerFan()">➕ Register Fan & Generate Link</button>
+
+            <div class="user-list" id="userList"></div>
+        </div>
+    </div>
+
+    <script>
+        let fanDatabase = {};
+        let celebrityData = {
+            name: 'Grace Charis',
+            photo: ''
+        };
+
+        async function loadData() {
+            const localData = localStorage.getItem('fanCardData');
+            if (localData) {
+                const parsed = JSON.parse(localData);
+                fanDatabase = parsed.fans || {};
+                celebrityData = parsed.celebrity || celebrityData;
+            } else {
+                try {
+                    const response = await fetch('fans.json');
+                    if (response.ok) {
+                        const data = await response.json();
+                        fanDatabase = data.fans || {};
+                        celebrityData = data.celebrity || celebrityData;
+                        saveData();
+                    }
+                } catch (e) {
+                    console.log('No fans.json file found');
+                }
+            }
+            
+            document.getElementById('celebrityName').value = celebrityData.name;
+            document.getElementById('celebrityPhoto').value = celebrityData.photo;
+            updateUserList();
+            updateStats();
+        }
+
+        function saveData() {
+            const data = {
+                fans: fanDatabase,
+                celebrity: celebrityData
+            };
+            localStorage.setItem('fanCardData', JSON.stringify(data));
+        }
+
+        window.addEventListener('DOMContentLoaded', loadData);
+
+        function generateFanId(name) {
+            return name.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Date.now();
+        }
+
+        function registerFan() {
+            const fanName = document.getElementById('fanName').value.trim();
+            const celebName = document.getElementById('celebrityName').value.trim();
+            const celebPhoto = document.getElementById('celebrityPhoto').value.trim();
+
+            if (!fanName) {
+                showMessage('❌ Please enter a fan name', 'error');
+                return;
+            }
+
+            if (!celebName) {
+                showMessage('❌ Please enter the celebrity name', 'error');
+                return;
+            }
+
+            celebrityData.name = celebName;
+            celebrityData.photo = celebPhoto;
+
+            const fanId = generateFanId(fanName);
+
+            fanDatabase[fanId] = {
+                name: fanName,
+                registeredDate: new Date().toISOString()
+            };
+
+            saveData();
+
+            const baseUrl = window.location.origin + window.location.pathname.replace('admin.html', 'index.html');
+            const fanLink = `${baseUrl}?fan=${fanId}`;
+            
+            navigator.clipboard.writeText(fanLink).then(() => {
+                showMessage(`✅ ${fanName} registered! Link copied to clipboard.`, 'success');
+            });
+            
+            document.getElementById('fanName').value = '';
+            updateUserList();
+            updateStats();
+        }
+
+        function updateStats() {
+            const fanIds = Object.keys(fanDatabase);
+            document.getElementById('fanCount').textContent = fanIds.length;
+            
+            const today = new Date().toDateString();
+            const todayCount = fanIds.filter(id => {
+                const fanDate = new Date(fanDatabase[id].registeredDate).toDateString();
+                return fanDate === today;
+            }).length;
+            document.getElementById('todayCount').textContent = todayCount;
+        }
+
+        function updateUserList() {
+            const userList = document.getElementById('userList');
+            const fanIds = Object.keys(fanDatabase);
+
+            if (fanIds.length === 0) {
+                userList.innerHTML = '<p style="text-align: center; color: #666; padding: 30px;">📋 No fans registered yet<br><small style="color: #999;">Register your first fan above!</small></p>';
+                return;
+            }
+
+            userList.innerHTML = '<strong style="display: block; margin-bottom: 15px; font-size: 16px; color: #333;">📋 Registered Fans (' + fanIds.length + '):</strong>' + 
+                fanIds.reverse().map(fanId => {
+                    const fan = fanDatabase[fanId];
+                    const baseUrl = window.location.origin + window.location.pathname.replace('admin.html', 'index.html');
+                    const fanLink = `${baseUrl}?fan=${fanId}`;
+                    return `
+                        <div class="user-item">
+                            <div class="user-name">👤 ${fan.name}</div>
+                            <div class="user-date">📅 ${new Date(fan.registeredDate).toLocaleString()}</div>
+                            <div class="user-actions">
+                                <button class="view-btn" onclick="window.open('${fanLink}', '_blank')">👁️ Preview</button>
+                                <button class="copy-link-btn" onclick="copyFanLink('${fanLink}', event)">📋 Copy Link</button>
+                                <button class="delete-btn" onclick="deleteFan('${fanId}')">🗑️ Delete</button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+        }
+
+        function copyFanLink(link, event) {
+            navigator.clipboard.writeText(link).then(() => {
+                const btn = event.target;
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '✅ Copied!';
+                btn.style.background = '#218838';
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.style.background = '';
+                }, 2000);
+            });
+        }
+
+        function deleteFan(fanId) {
+            const fanName = fanDatabase[fanId].name;
+            if (confirm(`Are you sure you want to delete ${fanName}?\n\nTheir fan card link will stop working.`)) {
+                delete fanDatabase[fanId];
+                saveData();
+                updateUserList();
+                updateStats();
+                showMessage(`🗑️ ${fanName} has been removed`, 'success');
+            }
+        }
+
+        function showMessage(text, type) {
+            const messageBox = document.getElementById('messageBox');
+            messageBox.innerHTML = `<div class="message ${type}">${text}</div>`;
+            setTimeout(() => {
+                messageBox.innerHTML = '';
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
