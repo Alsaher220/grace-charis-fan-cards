@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - Fan Card Manager</title>
+    <title>Admin Login</title>
     <style>
         * {
             margin: 0;
@@ -26,14 +26,14 @@
             width: 100%;
         }
 
-        .admin-section {
+        .login-section, .admin-section {
             background: white;
             border-radius: 20px;
             padding: 30px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
         }
 
-        .admin-header {
+        .login-header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             padding: 20px;
@@ -190,12 +190,43 @@
             color: #666;
             margin-top: 5px;
         }
+
+        .hidden {
+            display: none;
+        }
+
+        .logout-btn {
+            background: #dc3545;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="admin-section">
-            <div class="admin-header">
+        <!-- LOGIN SECTION -->
+        <div class="login-section" id="loginSection">
+            <div class="login-header">
+                <h1>🔐 Admin Login</h1>
+                <p style="font-size: 14px; opacity: 0.9;">Grace Charis Fan Card System</p>
+            </div>
+            
+            <div id="loginMessageBox"></div>
+
+            <div class="input-group">
+                <label for="adminPassword">Enter Admin Password:</label>
+                <input type="password" id="adminPassword" placeholder="Enter password" onkeypress="if(event.key==='Enter') login()">
+            </div>
+
+            <button onclick="login()">🔓 Login</button>
+
+            <p style="text-align: center; color: #999; font-size: 13px; margin-top: 15px;">
+                Default password: <code style="background: #f0f0f0; padding: 2px 6px; border-radius: 3px;">admin123</code>
+            </p>
+        </div>
+
+        <!-- ADMIN SECTION -->
+        <div class="admin-section hidden" id="adminSection">
+            <div class="login-header">
                 <h1>🔐 Admin Panel</h1>
                 <p style="font-size: 14px; opacity: 0.9;">Grace Charis Fan Card Manager</p>
             </div>
@@ -228,20 +259,25 @@
 
             <div class="input-group">
                 <label for="fanName">Fan Name:</label>
-                <input type="text" id="fanName" placeholder="Enter fan name to register">
+                <input type="text" id="fanName" placeholder="Enter fan name to register" onkeypress="if(event.key==='Enter') registerFan()">
             </div>
 
             <button onclick="registerFan()">➕ Register Fan & Generate Link</button>
 
             <div class="user-list" id="userList"></div>
+
+            <button class="logout-btn" onclick="logout()">🚪 Logout</button>
         </div>
     </div>
 
     <script>
+        // CHANGE THIS PASSWORD TO YOUR OWN!
+        const ADMIN_PASSWORD = ‘SaTURn1222';
+
         let fanDatabase = {};
         let celebrityData = {
             name: 'Grace Charis',
-            photo: ''
+            photo: 'https://cdn.i-scmp.com/sites/default/files/styles/768x768/public/d8/images/canvas/2025/04/23/e7b3bcfa-41b4-40ac-bff9-a46437a13cd7_8140c932.jpg?itok=a5KQpa_I&v=1745377355'
         };
 
         async function loadData() {
@@ -266,8 +302,6 @@
             
             document.getElementById('celebrityName').value = celebrityData.name;
             document.getElementById('celebrityPhoto').value = celebrityData.photo;
-            updateUserList();
-            updateStats();
         }
 
         function saveData() {
@@ -278,7 +312,38 @@
             localStorage.setItem('fanCardData', JSON.stringify(data));
         }
 
-        window.addEventListener('DOMContentLoaded', loadData);
+        function login() {
+            const password = document.getElementById('adminPassword').value;
+            
+            if (password === ADMIN_PASSWORD) {
+                localStorage.setItem('adminLoggedIn', 'true');
+                document.getElementById('loginSection').classList.add('hidden');
+                document.getElementById('adminSection').classList.remove('hidden');
+                loadData();
+                updateUserList();
+                updateStats();
+            } else {
+                showLoginMessage('❌ Incorrect password', 'error');
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('adminLoggedIn');
+            document.getElementById('adminSection').classList.add('hidden');
+            document.getElementById('loginSection').classList.remove('hidden');
+            document.getElementById('adminPassword').value = '';
+        }
+
+        window.addEventListener('DOMContentLoaded', function() {
+            const loggedIn = localStorage.getItem('adminLoggedIn');
+            if (loggedIn === 'true') {
+                document.getElementById('loginSection').classList.add('hidden');
+                document.getElementById('adminSection').classList.remove('hidden');
+                loadData();
+                updateUserList();
+                updateStats();
+            }
+        });
 
         function generateFanId(name) {
             return name.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Date.now();
@@ -389,6 +454,14 @@
 
         function showMessage(text, type) {
             const messageBox = document.getElementById('messageBox');
+            messageBox.innerHTML = `<div class="message ${type}">${text}</div>`;
+            setTimeout(() => {
+                messageBox.innerHTML = '';
+            }, 5000);
+        }
+
+        function showLoginMessage(text, type) {
+            const messageBox = document.getElementById('loginMessageBox');
             messageBox.innerHTML = `<div class="message ${type}">${text}</div>`;
             setTimeout(() => {
                 messageBox.innerHTML = '';
