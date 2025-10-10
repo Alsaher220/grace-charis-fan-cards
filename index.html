@@ -15,6 +15,9 @@
             align-items: center;
             padding: 20px;
         }
+        body.gold-theme {
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FF8C00 100%);
+        }
         .container { max-width: 500px; width: 100%; }
         .card-section {
             background: white;
@@ -22,12 +25,36 @@
             padding: 30px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
         }
+        .gold-theme .card-section {
+            border: 3px solid #FFD700;
+            box-shadow: 0 20px 60px rgba(255, 215, 0, 0.4);
+        }
         .welcome {
             text-align: center;
             font-size: 22px;
             color: #667eea;
             margin-bottom: 25px;
             font-weight: 600;
+        }
+        .gold-theme .welcome {
+            color: #FF8C00;
+            font-size: 26px;
+        }
+        .vip-badge {
+            text-align: center;
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.5);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
         }
         .card-wrapper {
             perspective: 1000px;
@@ -61,10 +88,16 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
         }
+        .gold-theme .card-front {
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+        }
         .card-back {
             background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
             color: white;
             transform: rotateY(180deg);
+        }
+        .gold-theme .card-back {
+            background: linear-gradient(135deg, #FF8C00 0%, #FF6347 100%);
         }
         .celeb-photo {
             width: 150px;
@@ -74,13 +107,18 @@
             margin-bottom: 20px;
             object-fit: cover;
             background: white;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+        .gold-theme .celeb-photo {
+            border: 6px solid #FFD700;
+            box-shadow: 0 5px 20px rgba(255, 215, 0, 0.6);
         }
         .fan-name {
             font-size: 32px;
             font-weight: bold;
             margin-bottom: 10px;
             text-align: center;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
         .card-title {
             font-size: 18px;
@@ -98,6 +136,10 @@
             border-radius: 10px;
             margin-top: 25px;
         }
+        .gold-theme .link-box {
+            background: linear-gradient(to right, #fff9e6, #fffaed);
+            border: 2px solid #FFD700;
+        }
         .link-display {
             background: white;
             padding: 15px;
@@ -108,6 +150,9 @@
             font-family: monospace;
             font-size: 13px;
             color: #333;
+        }
+        .gold-theme .link-display {
+            border: 2px solid #FFD700;
         }
         button {
             width: 100%;
@@ -121,6 +166,35 @@
             cursor: pointer;
         }
         button:hover { opacity: 0.9; }
+        .gold-theme button {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+        }
+        .music-control {
+            text-align: center;
+            margin-top: 15px;
+            padding: 12px;
+            background: rgba(102,126,234,0.1);
+            border-radius: 8px;
+        }
+        .gold-theme .music-control {
+            background: rgba(255,215,0,0.1);
+        }
+        .music-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .gold-theme .music-btn {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+        }
+        .music-btn:hover {
+            opacity: 0.9;
+        }
     </style>
 </head>
 <body>
@@ -128,11 +202,32 @@
         <div class="card-section" id="content"></div>
     </div>
 
+    <!-- Background Music - Beautiful Uplifting Track -->
+    <audio id="bgMusic" loop>
+        <source src="https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3" type="audio/mpeg">
+    </audio>
+
     <script>
+        let musicPlaying = false;
+        const audio = document.getElementById('bgMusic');
+
+        function toggleMusic() {
+            if (musicPlaying) {
+                audio.pause();
+                event.target.textContent = '🔇 Play Music';
+                musicPlaying = false;
+            } else {
+                audio.play();
+                event.target.textContent = '🔊 Pause Music';
+                musicPlaying = true;
+            }
+        }
+
         function copyLink() {
             navigator.clipboard.writeText(window.location.href);
             event.target.textContent = '✅ Link Copied!';
-            event.target.style.background = '#218838';
+            const isGold = document.body.classList.contains('gold-theme');
+            event.target.style.background = isGold ? '#FF8C00' : '#218838';
             setTimeout(() => {
                 event.target.textContent = '📋 Copy & Save This Link';
                 event.target.style.background = '';
@@ -144,30 +239,43 @@
             const fanName = params.get('name');
             const celebName = params.get('celeb');
             const celebPhoto = params.get('photo');
+            const cardType = params.get('type') || 'regular';
             
             if (fanName && celebName) {
+                const isGold = cardType === 'gold';
+                if (isGold) {
+                    document.body.classList.add('gold-theme');
+                }
+
                 const link = window.location.href;
                 const photo = celebPhoto || 'https://via.placeholder.com/150/667eea/ffffff?text=Photo';
                 
+                const goldBadge = isGold ? '<div class="vip-badge">👑 GOLD VIP MEMBER 👑</div>' : '';
+                
                 document.getElementById('content').innerHTML = `
+                    ${goldBadge}
                     <div class="welcome">✨ Your Exclusive Fan Card ✨</div>
                     <div class="card-wrapper">
                         <div class="fan-card">
                             <div class="card-face card-front">
                                 <img src="${photo}" class="celeb-photo" onerror="this.src='https://via.placeholder.com/150/667eea/ffffff?text=Photo'">
                                 <div class="fan-name">${fanName}</div>
-                                <div class="card-title">Official Fan</div>
+                                <div class="card-title">${isGold ? 'Gold VIP Fan' : 'Official Fan'}</div>
                                 <div class="celeb-name">${celebName}</div>
+                                ${isGold ? '<div style="margin-top:10px;font-size:16px;">👑</div>' : ''}
                             </div>
                             <div class="card-face card-back">
                                 <img src="${photo}" class="celeb-photo" onerror="this.src='https://via.placeholder.com/150/667eea/ffffff?text=Photo'">
-                                <div class="card-title">Thank you for your support!</div>
+                                <div class="card-title">Thank you for your ${isGold ? 'VIP ' : ''}support!</div>
                                 <div class="celeb-name">${celebName}</div>
                                 <div style="margin-top:20px;font-size:14px;opacity:0.9">
                                     You're part of something special ✨
                                 </div>
                             </div>
                         </div>
+                    </div>
+                    <div class="music-control">
+                        <button class="music-btn" onclick="toggleMusic()">🔊 Play Music</button>
                     </div>
                     <div class="link-box">
                         <strong style="display:block;margin-bottom:8px;color:#333">📌 Your Personal Link:</strong>
