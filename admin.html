@@ -38,14 +38,14 @@
             color: #333;
             font-weight: bold;
         }
-        input {
+        input, select {
             width: 100%;
             padding: 12px;
             border: 2px solid #e0e0e0;
             border-radius: 8px;
             font-size: 16px;
         }
-        input:focus {
+        input:focus, select:focus {
             outline: none;
             border-color: #667eea;
         }
@@ -92,11 +92,24 @@
             border-radius: 8px;
             border-left: 4px solid #667eea;
         }
+        .user-item.gold {
+            border-left: 4px solid #FFD700;
+            background: linear-gradient(to right, #fff9e6, white);
+        }
         .user-name {
             font-weight: bold;
             color: #333;
             font-size: 16px;
             margin-bottom: 5px;
+        }
+        .gold-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-left: 8px;
         }
         .user-actions {
             display: flex;
@@ -134,6 +147,29 @@
             background: #dc3545;
             margin-top: 20px;
         }
+        .card-type-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .card-type-btn {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        .card-type-btn.active {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+        .card-type-btn.gold.active {
+            border-color: #FFD700;
+            background: #fff9e6;
+        }
     </style>
 </head>
 <body>
@@ -166,10 +202,23 @@
                     <div style="font-size: 12px; color: #666; margin-top: 5px;">Total Fans</div>
                 </div>
                 <div class="stat-card">
+                    <div class="stat-number" id="goldCount">0</div>
+                    <div style="font-size: 12px; color: #666; margin-top: 5px;">Gold VIPs</div>
+                </div>
+                <div class="stat-card">
                     <div class="stat-number" id="today">0</div>
                     <div style="font-size: 12px; color: #666; margin-top: 5px;">Today</div>
                 </div>
             </div>
+
+            <div class="input-group">
+                <label>Background Music URL (Optional):</label>
+                <input type="text" id="musicUrl" placeholder="https://example.com/music.mp3">
+                <small style="color: #666; display: block; margin-top: 5px;">
+                    MP3 file URL - Will play on all fan cards
+                </small>
+            </div>
+
             <div class="input-group">
                 <label>Celebrity Name:</label>
                 <input type="text" id="cname" value="Grace Charis">
@@ -178,6 +227,21 @@
                 <label>Celebrity Photo URL:</label>
                 <input type="text" id="cphoto" value="https://cdn.i-scmp.com/sites/default/files/styles/768x768/public/d8/images/canvas/2025/04/23/e7b3bcfa-41b4-40ac-bff9-a46437a13cd7_8140c932.jpg?itok=a5KQpa_I&v=1745377355">
             </div>
+
+            <div class="input-group">
+                <label>Card Type:</label>
+                <div class="card-type-selector">
+                    <div class="card-type-btn active" id="regularBtn" onclick="selectCardType('regular')">
+                        <div style="font-size: 24px;">💜</div>
+                        <div style="font-weight: bold; margin-top: 5px;">Regular</div>
+                    </div>
+                    <div class="card-type-btn gold" id="goldBtn" onclick="selectCardType('gold')">
+                        <div style="font-size: 24px;">👑</div>
+                        <div style="font-weight: bold; margin-top: 5px;">Gold VIP</div>
+                    </div>
+                </div>
+            </div>
+
             <div class="input-group">
                 <label>Fan Name:</label>
                 <input type="text" id="fname" placeholder="Enter fan name">
@@ -193,8 +257,17 @@
         let db = {};
         let celeb = {
             name: 'Grace Charis',
-            photo: 'https://cdn.i-scmp.com/sites/default/files/styles/768x768/public/d8/images/canvas/2025/04/23/e7b3bcfa-41b4-40ac-bff9-a46437a13cd7_8140c932.jpg?itok=a5KQpa_I&v=1745377355'
+            photo: 'https://cdn.i-scmp.com/sites/default/files/styles/768x768/public/d8/images/canvas/2025/04/23/e7b3bcfa-41b4-40ac-bff9-a46437a13cd7_8140c932.jpg?itok=a5KQpa_I&v=1745377355',
+            music: ''
         };
+        let selectedCardType = 'regular';
+
+        function selectCardType(type) {
+            selectedCardType = type;
+            document.getElementById('regularBtn').classList.remove('active');
+            document.getElementById('goldBtn').classList.remove('active');
+            document.getElementById(type === 'regular' ? 'regularBtn' : 'goldBtn').classList.add('active');
+        }
 
         function load() {
             const d = localStorage.getItem('fanData');
@@ -205,6 +278,7 @@
             }
             document.getElementById('cname').value = celeb.name;
             document.getElementById('cphoto').value = celeb.photo;
+            document.getElementById('musicUrl').value = celeb.music || '';
         }
 
         function save() {
@@ -233,6 +307,7 @@
             const fn = document.getElementById('fname').value.trim();
             const cn = document.getElementById('cname').value.trim();
             const cp = document.getElementById('cphoto').value.trim();
+            const music = document.getElementById('musicUrl').value.trim();
             
             if (!fn) {
                 msg('❌ Enter fan name', 'error');
@@ -241,31 +316,42 @@
             
             celeb.name = cn;
             celeb.photo = cp;
+            celeb.music = music;
             save();
             
             const id = fn.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Date.now();
-            db[id] = {name: fn, date: new Date().toISOString()};
+            db[id] = {
+                name: fn, 
+                date: new Date().toISOString(),
+                type: selectedCardType
+            };
             save();
             
-            // Create link with encoded name and celebrity info
             const baseUrl = window.location.origin + window.location.pathname.replace('admin.html', 'index.html');
             const params = new URLSearchParams({
                 name: fn,
                 celeb: cn,
-                photo: cp
+                photo: cp,
+                type: selectedCardType,
+                music: music
             });
             const link = baseUrl + '?' + params.toString();
             
             navigator.clipboard.writeText(link);
-            msg('✅ ' + fn + ' registered! Link copied to clipboard!', 'success');
+            const cardTypeName = selectedCardType === 'gold' ? '👑 GOLD VIP' : '💜 Regular';
+            msg('✅ ' + fn + ' registered as ' + cardTypeName + '! Link copied!', 'success');
             
             document.getElementById('fname').value = '';
+            selectCardType('regular');
             refresh();
         }
 
         function refresh() {
             const ids = Object.keys(db);
             document.getElementById('total').textContent = ids.length;
+            
+            const goldFans = ids.filter(i => db[i].type === 'gold').length;
+            document.getElementById('goldCount').textContent = goldFans;
             
             const today = new Date().toDateString();
             const tc = ids.filter(i => new Date(db[i].date).toDateString() === today).length;
@@ -278,6 +364,7 @@
             
             const cn = celeb.name;
             const cp = celeb.photo;
+            const music = celeb.music;
             
             document.getElementById('list').innerHTML = '<strong style="display:block;margin-bottom:15px">📋 Fans (' + ids.length + '):</strong>' +
                 ids.reverse().map(i => {
@@ -286,13 +373,19 @@
                     const params = new URLSearchParams({
                         name: f.name,
                         celeb: cn,
-                        photo: cp
+                        photo: cp,
+                        type: f.type || 'regular',
+                        music: music
                     });
                     const link = baseUrl + '?' + params.toString();
+                    const isGold = f.type === 'gold';
                     
                     return `
-                        <div class="user-item">
-                            <div class="user-name">👤 ${f.name}</div>
+                        <div class="user-item ${isGold ? 'gold' : ''}">
+                            <div class="user-name">
+                                ${isGold ? '👑' : '👤'} ${f.name}
+                                ${isGold ? '<span class="gold-badge">GOLD VIP</span>' : ''}
+                            </div>
                             <div style="font-size:12px;color:#999;margin-bottom:10px">${new Date(f.date).toLocaleString()}</div>
                             <div class="user-actions">
                                 <button class="view-btn" onclick="window.open('${link}','_blank')">👁️ View</button>
