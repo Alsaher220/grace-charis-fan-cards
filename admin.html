@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Login</title>
+    <title>Admin Panel</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -176,13 +176,13 @@
             </div>
             <div class="input-group">
                 <label>Celebrity Photo URL:</label>
-                <input type="text" id="cphoto" value="">
+                <input type="text" id="cphoto" value="https://cdn.i-scmp.com/sites/default/files/styles/768x768/public/d8/images/canvas/2025/04/23/e7b3bcfa-41b4-40ac-bff9-a46437a13cd7_8140c932.jpg?itok=a5KQpa_I&v=1745377355">
             </div>
             <div class="input-group">
                 <label>Fan Name:</label>
                 <input type="text" id="fname" placeholder="Enter fan name">
             </div>
-            <button onclick="addFan()">➕ Register Fan</button>
+            <button onclick="addFan()">➕ Register Fan & Generate Link</button>
             <div class="user-list" id="list"></div>
             <button class="logout-btn" onclick="doLogout()">🚪 Logout</button>
         </div>
@@ -241,15 +241,23 @@
             
             celeb.name = cn;
             celeb.photo = cp;
+            save();
             
             const id = fn.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Date.now();
             db[id] = {name: fn, date: new Date().toISOString()};
             save();
             
-            const link = window.location.origin + window.location.pathname.replace('admin.html', 'index.html') + '?fan=' + id;
+            // Create link with encoded name and celebrity info
+            const baseUrl = window.location.origin + window.location.pathname.replace('admin.html', 'index.html');
+            const params = new URLSearchParams({
+                name: fn,
+                celeb: cn,
+                photo: cp
+            });
+            const link = baseUrl + '?' + params.toString();
             
             navigator.clipboard.writeText(link);
-            msg('✅ ' + fn + ' registered! Link copied!', 'success');
+            msg('✅ ' + fn + ' registered! Link copied to clipboard!', 'success');
             
             document.getElementById('fname').value = '';
             refresh();
@@ -268,10 +276,20 @@
                 return;
             }
             
+            const cn = celeb.name;
+            const cp = celeb.photo;
+            
             document.getElementById('list').innerHTML = '<strong style="display:block;margin-bottom:15px">📋 Fans (' + ids.length + '):</strong>' +
                 ids.reverse().map(i => {
                     const f = db[i];
-                    const link = window.location.origin + window.location.pathname.replace('admin.html', 'index.html') + '?fan=' + i;
+                    const baseUrl = window.location.origin + window.location.pathname.replace('admin.html', 'index.html');
+                    const params = new URLSearchParams({
+                        name: f.name,
+                        celeb: cn,
+                        photo: cp
+                    });
+                    const link = baseUrl + '?' + params.toString();
+                    
                     return `
                         <div class="user-item">
                             <div class="user-name">👤 ${f.name}</div>
