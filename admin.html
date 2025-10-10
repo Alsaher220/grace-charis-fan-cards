@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,14 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Login</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: Arial, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
@@ -21,20 +15,14 @@
             align-items: center;
             padding: 20px;
         }
-
-        .container {
-            max-width: 600px;
-            width: 100%;
-        }
-
-        .login-section, .admin-section {
+        .container { max-width: 600px; width: 100%; }
+        .section {
             background: white;
             border-radius: 20px;
             padding: 30px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
         }
-
-        .login-header {
+        .header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             padding: 20px;
@@ -42,40 +30,28 @@
             margin-bottom: 25px;
             text-align: center;
         }
-
-        h1 {
-            font-size: 28px;
-            margin-bottom: 5px;
-        }
-
-        .input-group {
-            margin-bottom: 15px;
-        }
-
+        h1 { font-size: 28px; margin-bottom: 5px; }
+        .input-group { margin-bottom: 15px; }
         label {
             display: block;
             margin-bottom: 5px;
             color: #333;
             font-weight: bold;
         }
-
         input {
             width: 100%;
             padding: 12px;
             border: 2px solid #e0e0e0;
             border-radius: 8px;
             font-size: 16px;
-            transition: border-color 0.3s;
         }
-
         input:focus {
             outline: none;
             border-color: #667eea;
         }
-
         button {
             width: 100%;
-            padding: 12px;
+            padding: 14px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
@@ -83,36 +59,24 @@
             font-size: 16px;
             font-weight: bold;
             cursor: pointer;
-            transition: transform 0.2s;
         }
-
-        button:hover {
-            transform: translateY(-2px);
-        }
-
-        button:active {
-            transform: translateY(0);
-        }
-
+        button:hover { opacity: 0.9; }
         .message {
             padding: 12px;
             border-radius: 8px;
             margin-bottom: 15px;
             text-align: center;
         }
-
         .success {
             background: #d4edda;
             color: #155724;
             border: 1px solid #c3e6cb;
         }
-
         .error {
             background: #f8d7da;
             color: #721c24;
             border: 1px solid #f5c6cb;
         }
-
         .user-list {
             max-height: 400px;
             overflow-y: auto;
@@ -121,61 +85,38 @@
             padding: 15px;
             margin-top: 20px;
         }
-
         .user-item {
             padding: 15px;
             background: white;
             margin-bottom: 10px;
             border-radius: 8px;
             border-left: 4px solid #667eea;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
-
         .user-name {
             font-weight: bold;
             color: #333;
             font-size: 16px;
             margin-bottom: 5px;
         }
-
-        .user-date {
-            font-size: 12px;
-            color: #999;
-            margin-bottom: 10px;
-        }
-
         .user-actions {
             display: flex;
             gap: 8px;
-            flex-wrap: wrap;
+            margin-top: 10px;
         }
-
         .user-actions button {
             padding: 8px 15px;
             font-size: 13px;
             width: auto;
             flex: 1;
-            min-width: 100px;
         }
-
-        .view-btn {
-            background: #667eea;
-        }
-
-        .copy-link-btn {
-            background: #28a745;
-        }
-
-        .delete-btn {
-            background: #dc3545;
-        }
-
+        .view-btn { background: #667eea; }
+        .copy-btn { background: #28a745; }
+        .delete-btn { background: #dc3545; }
         .stats {
             display: flex;
             gap: 15px;
             margin-bottom: 20px;
         }
-
         .stat-card {
             flex: 1;
             background: #f8f9fa;
@@ -183,23 +124,12 @@
             border-radius: 8px;
             text-align: center;
         }
-
         .stat-number {
             font-size: 28px;
             font-weight: bold;
             color: #667eea;
         }
-
-        .stat-label {
-            font-size: 12px;
-            color: #666;
-            margin-top: 5px;
-        }
-
-        .hidden {
-            display: none;
-        }
-
+        .hidden { display: none; }
         .logout-btn {
             background: #dc3545;
             margin-top: 20px;
@@ -208,317 +138,188 @@
 </head>
 <body>
     <div class="container">
-        <!-- LOGIN SECTION -->
-        <div class="login-section" id="loginSection">
-            <div class="login-header">
+        <div class="section" id="loginSection">
+            <div class="header">
                 <h1>🔐 Admin Login</h1>
                 <p style="font-size: 14px; opacity: 0.9;">Grace Charis Fan Card System</p>
             </div>
-            
-            <div id="loginMessageBox"></div>
-
+            <div id="loginMsg"></div>
             <div class="input-group">
-                <label for="adminPassword">Enter Admin Password:</label>
-                <input type="password" id="adminPassword" placeholder="Enter password">
+                <label>Enter Admin Password:</label>
+                <input type="password" id="pwd" placeholder="Enter password">
             </div>
-
-            <button type="button" id="loginBtn">🔓 Login</button>
-
+            <button onclick="doLogin()">🔓 Login</button>
             <p style="text-align: center; color: #999; font-size: 13px; margin-top: 15px;">
-                Default password: <code style="background: #f0f0f0; padding: 2px 6px; border-radius: 3px;">admin123</code>
+                Password: <code style="background: #f0f0f0; padding: 2px 6px;">admin123</code>
             </p>
         </div>
 
-        <!-- ADMIN SECTION -->
-        <div class="admin-section hidden" id="adminSection">
-            <div class="login-header">
+        <div class="section hidden" id="adminSection">
+            <div class="header">
                 <h1>🔐 Admin Panel</h1>
                 <p style="font-size: 14px; opacity: 0.9;">Grace Charis Fan Card Manager</p>
             </div>
-            
-            <div id="messageBox"></div>
-
+            <div id="msg"></div>
             <div class="stats">
                 <div class="stat-card">
-                    <div class="stat-number" id="fanCount">0</div>
-                    <div class="stat-label">Total Fans</div>
+                    <div class="stat-number" id="total">0</div>
+                    <div style="font-size: 12px; color: #666; margin-top: 5px;">Total Fans</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number" id="todayCount">0</div>
-                    <div class="stat-label">Registered Today</div>
+                    <div class="stat-number" id="today">0</div>
+                    <div style="font-size: 12px; color: #666; margin-top: 5px;">Today</div>
                 </div>
             </div>
-
             <div class="input-group">
-                <label for="celebrityName">Celebrity Name:</label>
-                <input type="text" id="celebrityName" placeholder="Enter celebrity name" value="Grace Charis">
+                <label>Celebrity Name:</label>
+                <input type="text" id="cname" value="Grace Charis">
             </div>
-
             <div class="input-group">
-                <label for="celebrityPhoto">Celebrity Photo URL:</label>
-                <input type="text" id="celebrityPhoto" placeholder="https://example.com/photo.jpg">
-                <small style="color: #666; display: block; margin-top: 5px;">
-                    Current photo will show on all fan cards
-                </small>
+                <label>Celebrity Photo URL:</label>
+                <input type="text" id="cphoto" value="">
             </div>
-
             <div class="input-group">
-                <label for="fanName">Fan Name:</label>
-                <input type="text" id="fanName" placeholder="Enter fan name to register">
+                <label>Fan Name:</label>
+                <input type="text" id="fname" placeholder="Enter fan name">
             </div>
-
-            <button type="button" id="registerBtn">➕ Register Fan & Generate Link</button>
-
-            <div class="user-list" id="userList"></div>
-
-            <button type="button" class="logout-btn" id="logoutBtn">🚪 Logout</button>
+            <button onclick="addFan()">➕ Register Fan</button>
+            <div class="user-list" id="list"></div>
+            <button class="logout-btn" onclick="doLogout()">🚪 Logout</button>
         </div>
     </div>
 
     <script>
-        // CHANGE THIS PASSWORD TO YOUR OWN!
-        const ADMIN_PASSWORD = ‘SaTURn1222';
-
-        let fanDatabase = {};
-        let celebrityData = {
+        const PWD = 'admin123';
+        let db = {};
+        let celeb = {
             name: 'Grace Charis',
             photo: 'https://cdn.i-scmp.com/sites/default/files/styles/768x768/public/d8/images/canvas/2025/04/23/e7b3bcfa-41b4-40ac-bff9-a46437a13cd7_8140c932.jpg?itok=a5KQpa_I&v=1745377355'
         };
 
-        // Wait for page to load
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('Page loaded - Setting up event listeners');
-            
-            // Check if already logged in
-            const loggedIn = localStorage.getItem('adminLoggedIn');
-            if (loggedIn === 'true') {
-                showAdminPanel();
+        function load() {
+            const d = localStorage.getItem('fanData');
+            if (d) {
+                const p = JSON.parse(d);
+                db = p.fans || {};
+                celeb = p.celeb || celeb;
             }
+            document.getElementById('cname').value = celeb.name;
+            document.getElementById('cphoto').value = celeb.photo;
+        }
 
-            // Login button
-            document.getElementById('loginBtn').addEventListener('click', function() {
-                console.log('Login button clicked');
-                login();
-            });
+        function save() {
+            localStorage.setItem('fanData', JSON.stringify({fans: db, celeb: celeb}));
+        }
 
-            // Enter key on password field
-            document.getElementById('adminPassword').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    login();
-                }
-            });
-
-            // Register button
-            document.getElementById('registerBtn').addEventListener('click', function() {
-                registerFan();
-            });
-
-            // Enter key on fan name field
-            document.getElementById('fanName').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    registerFan();
-                }
-            });
-
-            // Logout button
-            document.getElementById('logoutBtn').addEventListener('click', function() {
-                logout();
-            });
-        });
-
-        async function loadData() {
-            const localData = localStorage.getItem('fanCardData');
-            if (localData) {
-                const parsed = JSON.parse(localData);
-                fanDatabase = parsed.fans || {};
-                celebrityData = parsed.celebrity || celebrityData;
+        function doLogin() {
+            const p = document.getElementById('pwd').value;
+            if (p === PWD) {
+                localStorage.setItem('loggedIn', 'yes');
+                document.getElementById('loginSection').classList.add('hidden');
+                document.getElementById('adminSection').classList.remove('hidden');
+                load();
+                refresh();
             } else {
-                try {
-                    const response = await fetch('fans.json');
-                    if (response.ok) {
-                        const data = await response.json();
-                        fanDatabase = data.fans || {};
-                        celebrityData = data.celebrity || celebrityData;
-                        saveData();
-                    }
-                } catch (e) {
-                    console.log('No fans.json file found');
-                }
-            }
-            
-            document.getElementById('celebrityName').value = celebrityData.name;
-            document.getElementById('celebrityPhoto').value = celebrityData.photo;
-        }
-
-        function saveData() {
-            const data = {
-                fans: fanDatabase,
-                celebrity: celebrityData
-            };
-            localStorage.setItem('fanCardData', JSON.stringify(data));
-        }
-
-        function login() {
-            console.log('Login function called');
-            const password = document.getElementById('adminPassword').value;
-            console.log('Password entered:', password.length > 0 ? 'Yes' : 'No');
-            
-            if (password === ADMIN_PASSWORD) {
-                console.log('Password correct!');
-                localStorage.setItem('adminLoggedIn', 'true');
-                showAdminPanel();
-            } else {
-                console.log('Password incorrect');
-                showLoginMessage('❌ Incorrect password. Try: admin123', 'error');
+                document.getElementById('loginMsg').innerHTML = '<div class="message error">❌ Wrong password</div>';
             }
         }
 
-        async function showAdminPanel() {
-            document.getElementById('loginSection').classList.add('hidden');
-            document.getElementById('adminSection').classList.remove('hidden');
-            await loadData();
-            updateUserList();
-            updateStats();
+        function doLogout() {
+            localStorage.removeItem('loggedIn');
+            location.reload();
         }
 
-        function logout() {
-            localStorage.removeItem('adminLoggedIn');
-            document.getElementById('adminSection').classList.add('hidden');
-            document.getElementById('loginSection').classList.remove('hidden');
-            document.getElementById('adminPassword').value = '';
-        }
-
-        function generateFanId(name) {
-            return name.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Date.now();
-        }
-
-        function registerFan() {
-            const fanName = document.getElementById('fanName').value.trim();
-            const celebName = document.getElementById('celebrityName').value.trim();
-            const celebPhoto = document.getElementById('celebrityPhoto').value.trim();
-
-            if (!fanName) {
-                showMessage('❌ Please enter a fan name', 'error');
+        function addFan() {
+            const fn = document.getElementById('fname').value.trim();
+            const cn = document.getElementById('cname').value.trim();
+            const cp = document.getElementById('cphoto').value.trim();
+            
+            if (!fn) {
+                msg('❌ Enter fan name', 'error');
                 return;
             }
-
-            if (!celebName) {
-                showMessage('❌ Please enter the celebrity name', 'error');
-                return;
-            }
-
-            celebrityData.name = celebName;
-            celebrityData.photo = celebPhoto;
-
-            const fanId = generateFanId(fanName);
-
-            fanDatabase[fanId] = {
-                name: fanName,
-                registeredDate: new Date().toISOString()
-            };
-
-            saveData();
-
-            const baseUrl = window.location.origin + window.location.pathname.replace('admin.html', 'index.html');
-            const fanLink = `${baseUrl}?fan=${fanId}`;
             
-            navigator.clipboard.writeText(fanLink).then(() => {
-                showMessage(`✅ ${fanName} registered! Link copied to clipboard.`, 'success');
-            }).catch(() => {
-                showMessage(`✅ ${fanName} registered! Link: ${fanLink}`, 'success');
-            });
+            celeb.name = cn;
+            celeb.photo = cp;
             
-            document.getElementById('fanName').value = '';
-            updateUserList();
-            updateStats();
+            const id = fn.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Date.now();
+            db[id] = {name: fn, date: new Date().toISOString()};
+            save();
+            
+            const link = window.location.origin + window.location.pathname.replace('admin.html', 'index.html') + '?fan=' + id;
+            
+            navigator.clipboard.writeText(link);
+            msg('✅ ' + fn + ' registered! Link copied!', 'success');
+            
+            document.getElementById('fname').value = '';
+            refresh();
         }
 
-        function updateStats() {
-            const fanIds = Object.keys(fanDatabase);
-            document.getElementById('fanCount').textContent = fanIds.length;
+        function refresh() {
+            const ids = Object.keys(db);
+            document.getElementById('total').textContent = ids.length;
             
             const today = new Date().toDateString();
-            const todayCount = fanIds.filter(id => {
-                const fanDate = new Date(fanDatabase[id].registeredDate).toDateString();
-                return fanDate === today;
-            }).length;
-            document.getElementById('todayCount').textContent = todayCount;
-        }
-
-        function updateUserList() {
-            const userList = document.getElementById('userList');
-            const fanIds = Object.keys(fanDatabase);
-
-            if (fanIds.length === 0) {
-                userList.innerHTML = '<p style="text-align: center; color: #666; padding: 30px;">📋 No fans registered yet<br><small style="color: #999;">Register your first fan above!</small></p>';
+            const tc = ids.filter(i => new Date(db[i].date).toDateString() === today).length;
+            document.getElementById('today').textContent = tc;
+            
+            if (ids.length === 0) {
+                document.getElementById('list').innerHTML = '<p style="text-align:center;color:#666;padding:30px">No fans yet</p>';
                 return;
             }
-
-            const sortedFanIds = fanIds.sort((a, b) => {
-                return new Date(fanDatabase[b].registeredDate) - new Date(fanDatabase[a].registeredDate);
-            });
-
-            userList.innerHTML = '<strong style="display: block; margin-bottom: 15px; font-size: 16px; color: #333;">📋 Registered Fans (' + fanIds.length + '):</strong>' + 
-                sortedFanIds.map(fanId => {
-                    const fan = fanDatabase[fanId];
-                    const baseUrl = window.location.origin + window.location.pathname.replace('admin.html', 'index.html');
-                    const fanLink = `${baseUrl}?fan=${fanId}`;
+            
+            document.getElementById('list').innerHTML = '<strong style="display:block;margin-bottom:15px">📋 Fans (' + ids.length + '):</strong>' +
+                ids.reverse().map(i => {
+                    const f = db[i];
+                    const link = window.location.origin + window.location.pathname.replace('admin.html', 'index.html') + '?fan=' + i;
                     return `
                         <div class="user-item">
-                            <div class="user-name">👤 ${fan.name}</div>
-                            <div class="user-date">📅 ${new Date(fan.registeredDate).toLocaleString()}</div>
+                            <div class="user-name">👤 ${f.name}</div>
+                            <div style="font-size:12px;color:#999;margin-bottom:10px">${new Date(f.date).toLocaleString()}</div>
                             <div class="user-actions">
-                                <button class="view-btn" onclick="window.open('${fanLink}', '_blank')">👁️ Preview</button>
-                                <button class="copy-link-btn" onclick="copyFanLink('${fanLink}', event)">📋 Copy Link</button>
-                                <button class="delete-btn" onclick="deleteFan('${fanId}')">🗑️ Delete</button>
+                                <button class="view-btn" onclick="window.open('${link}','_blank')">👁️ View</button>
+                                <button class="copy-btn" onclick="copy('${link}',event)">📋 Copy</button>
+                                <button class="delete-btn" onclick="del('${i}')">🗑️ Delete</button>
                             </div>
                         </div>
                     `;
                 }).join('');
         }
 
-        function copyFanLink(link, event) {
-            event.preventDefault();
-            event.stopPropagation();
-            
-            navigator.clipboard.writeText(link).then(() => {
-                const btn = event.target;
-                const originalText = btn.innerHTML;
-                btn.innerHTML = '✅ Copied!';
-                btn.style.background = '#218838';
-                setTimeout(() => {
-                    btn.innerHTML = originalText;
-                    btn.style.background = '';
-                }, 2000);
-            });
+        function copy(link, e) {
+            e.stopPropagation();
+            navigator.clipboard.writeText(link);
+            const btn = e.target;
+            const orig = btn.innerHTML;
+            btn.innerHTML = '✅ Copied!';
+            btn.style.background = '#218838';
+            setTimeout(() => {
+                btn.innerHTML = orig;
+                btn.style.background = '';
+            }, 2000);
         }
 
-        function deleteFan(fanId) {
-            const fanName = fanDatabase[fanId].name;
-            if (confirm(`Are you sure you want to delete ${fanName}?\n\nTheir fan card link will stop working.`)) {
-                delete fanDatabase[fanId];
-                saveData();
-                updateUserList();
-                updateStats();
-                showMessage(`🗑️ ${fanName} has been removed`, 'success');
+        function del(id) {
+            if (confirm('Delete ' + db[id].name + '?')) {
+                delete db[id];
+                save();
+                refresh();
             }
         }
 
-        function showMessage(text, type) {
-            const messageBox = document.getElementById('messageBox');
-            messageBox.innerHTML = `<div class="message ${type}">${text}</div>`;
-            setTimeout(() => {
-                messageBox.innerHTML = '';
-            }, 5000);
+        function msg(text, type) {
+            document.getElementById('msg').innerHTML = '<div class="message ' + type + '">' + text + '</div>';
+            setTimeout(() => document.getElementById('msg').innerHTML = '', 5000);
         }
 
-        function showLoginMessage(text, type) {
-            const messageBox = document.getElementById('loginMessageBox');
-            messageBox.innerHTML = `<div class="message ${type}">${text}</div>`;
-            setTimeout(() => {
-                messageBox.innerHTML = '';
-            }, 5000);
-        }
+        window.onload = function() {
+            if (localStorage.getItem('loggedIn') === 'yes') {
+                document.getElementById('loginSection').classList.add('hidden');
+                document.getElementById('adminSection').classList.remove('hidden');
+                load();
+                refresh();
+            }
+        };
     </script>
 </body>
 </html>
