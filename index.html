@@ -3,16 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your Fan Card</title>
+    <title>Grace Charis Fan Card</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: Arial, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
@@ -20,32 +15,24 @@
             align-items: center;
             padding: 20px;
         }
-
-        .container {
-            max-width: 500px;
-            width: 100%;
-        }
-
+        .container { max-width: 500px; width: 100%; }
         .card-section {
             background: white;
             border-radius: 20px;
             padding: 30px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
         }
-
-        .welcome-text {
+        .welcome {
             text-align: center;
-            font-size: 20px;
+            font-size: 22px;
             color: #667eea;
             margin-bottom: 25px;
             font-weight: 600;
         }
-
         .card-wrapper {
             perspective: 1000px;
             margin: 30px 0;
         }
-
         .fan-card {
             width: 100%;
             height: 400px;
@@ -53,12 +40,10 @@
             transform-style: preserve-3d;
             animation: spin 6s linear infinite;
         }
-
         @keyframes spin {
             0% { transform: rotateY(0deg); }
             100% { transform: rotateY(360deg); }
         }
-
         .card-face {
             position: absolute;
             width: 100%;
@@ -72,19 +57,16 @@
             padding: 30px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.2);
         }
-
         .card-front {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
         }
-
         .card-back {
             background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
             color: white;
             transform: rotateY(180deg);
         }
-
-        .celebrity-photo {
+        .celeb-photo {
             width: 150px;
             height: 150px;
             border-radius: 50%;
@@ -93,7 +75,6 @@
             object-fit: cover;
             background: white;
         }
-
         .fan-name {
             font-size: 32px;
             font-weight: bold;
@@ -101,26 +82,22 @@
             text-align: center;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
         }
-
         .card-title {
             font-size: 18px;
             opacity: 0.95;
             margin-bottom: 5px;
         }
-
-        .celebrity-name {
+        .celeb-name {
             font-size: 24px;
             font-weight: bold;
             margin-top: 10px;
         }
-
-        .link-section {
+        .link-box {
             background: #f8f9fa;
             padding: 20px;
             border-radius: 10px;
             margin-top: 25px;
         }
-
         .link-display {
             background: white;
             padding: 15px;
@@ -132,8 +109,7 @@
             font-size: 13px;
             color: #333;
         }
-
-        .copy-btn {
+        button {
             width: 100%;
             padding: 14px;
             background: #28a745;
@@ -143,155 +119,106 @@
             font-size: 16px;
             font-weight: bold;
             cursor: pointer;
-            transition: all 0.3s;
         }
-
-        .copy-btn:hover {
-            background: #218838;
-            transform: translateY(-2px);
-        }
-
-        .error-message {
-            text-align: center;
-            padding: 50px 30px;
-        }
-
-        .error-message h2 {
-            color: #dc3545;
-            margin-bottom: 15px;
-        }
-
-        .error-message p {
-            color: #666;
-            line-height: 1.6;
-        }
+        button:hover { opacity: 0.9; }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="card-section" id="cardSection">
-            <!-- Content will be loaded by JavaScript -->
-        </div>
+        <div class="card-section" id="content"></div>
     </div>
 
     <script>
-        let fanDatabase = {};
-        let celebrityData = {
+        let db = {};
+        let celeb = {
             name: 'Grace Charis',
-            photo: ''
+            photo: 'https://cdn.i-scmp.com/sites/default/files/styles/768x768/public/d8/images/canvas/2025/04/23/e7b3bcfa-41b4-40ac-bff9-a46437a13cd7_8140c932.jpg?itok=a5KQpa_I&v=1745377355'
         };
 
-        async function loadData() {
-            const localData = localStorage.getItem('fanCardData');
-            if (localData) {
-                const parsed = JSON.parse(localData);
-                fanDatabase = parsed.fans || {};
-                celebrityData = parsed.celebrity || celebrityData;
-            } else {
-                try {
-                    const response = await fetch('fans.json');
-                    if (response.ok) {
-                        const data = await response.json();
-                        fanDatabase = data.fans || {};
-                        celebrityData = data.celebrity || celebrityData;
-                    }
-                } catch (e) {
-                    console.log('No data found');
-                }
+        function load() {
+            const d = localStorage.getItem('fanData');
+            if (d) {
+                const p = JSON.parse(d);
+                db = p.fans || {};
+                celeb = p.celeb || celeb;
             }
         }
 
-        window.addEventListener('DOMContentLoaded', async function() {
-            await loadData();
+        function show(id) {
+            const f = db[id];
+            const link = window.location.href;
+            const photo = celeb.photo || 'https://via.placeholder.com/150/667eea/ffffff?text=Photo';
             
-            const urlParams = new URLSearchParams(window.location.search);
-            const fanId = urlParams.get('fan');
-            
-            if (fanId && fanDatabase[fanId]) {
-                showFanCard(fanId);
-            } else if (fanId) {
-                showError();
-            } else {
-                showWelcome();
-            }
-        });
-
-        function showFanCard(fanId) {
-            const fan = fanDatabase[fanId];
-            const photoUrl = celebrityData.photo || 'https://via.placeholder.com/150/667eea/ffffff?text=Photo';
-            
-            const baseUrl = window.location.origin + window.location.pathname;
-            const personalLink = `${baseUrl}?fan=${fanId}`;
-
-            document.getElementById('cardSection').innerHTML = `
-                <div class="welcome-text">✨ Your Exclusive Fan Card ✨</div>
-                
+            document.getElementById('content').innerHTML = `
+                <div class="welcome">✨ Your Exclusive Fan Card ✨</div>
                 <div class="card-wrapper">
                     <div class="fan-card">
                         <div class="card-face card-front">
-                            <img src="${photoUrl}" alt="Celebrity" class="celebrity-photo">
-                            <div class="fan-name">${fan.name}</div>
+                            <img src="${photo}" class="celeb-photo">
+                            <div class="fan-name">${f.name}</div>
                             <div class="card-title">Official Fan</div>
-                            <div class="celebrity-name">${celebrityData.name}</div>
+                            <div class="celeb-name">${celeb.name}</div>
                         </div>
                         <div class="card-face card-back">
-                            <img src="${photoUrl}" alt="Celebrity" class="celebrity-photo">
+                            <img src="${photo}" class="celeb-photo">
                             <div class="card-title">Thank you for your support!</div>
-                            <div class="celebrity-name">${celebrityData.name}</div>
-                            <div style="margin-top: 20px; font-size: 14px; opacity: 0.9;">
+                            <div class="celeb-name">${celeb.name}</div>
+                            <div style="margin-top:20px;font-size:14px;opacity:0.9">
                                 You're part of something special ✨
                             </div>
                         </div>
                     </div>
                 </div>
-
-                <div class="link-section">
-                    <strong style="display: block; margin-bottom: 8px; color: #333;">📌 Your Personal Link:</strong>
-                    <div class="link-display">${personalLink}</div>
-                    <button class="copy-btn" onclick="copyLink('${personalLink}', event)">📋 Copy & Save This Link</button>
-                    <p style="margin-top: 12px; font-size: 13px; color: #666; text-align: center;">
+                <div class="link-box">
+                    <strong style="display:block;margin-bottom:8px;color:#333">📌 Your Personal Link:</strong>
+                    <div class="link-display">${link}</div>
+                    <button onclick="copyLink()">📋 Copy & Save This Link</button>
+                    <p style="margin-top:12px;font-size:13px;color:#666;text-align:center">
                         Bookmark this link to view your card anytime!
                     </p>
                 </div>
             `;
         }
 
-        function showError() {
-            document.getElementById('cardSection').innerHTML = `
-                <div class="error-message">
-                    <h2>❌ Fan Card Not Found</h2>
-                    <p>This fan card doesn't exist or has been removed.<br>Please contact the administrator for a valid link.</p>
-                </div>
-            `;
+        function copyLink() {
+            navigator.clipboard.writeText(window.location.href);
+            event.target.textContent = '✅ Link Copied!';
+            event.target.style.background = '#218838';
+            setTimeout(() => {
+                event.target.textContent = '📋 Copy & Save This Link';
+                event.target.style.background = '';
+            }, 3000);
         }
 
-        function showWelcome() {
-            document.getElementById('cardSection').innerHTML = `
-                <div class="error-message">
-                    <h1 style="color: #667eea; margin-bottom: 20px; font-size: 32px;">🌟 Grace Charis Fan Cards</h1>
-                    <p style="font-size: 16px;">
-                        Welcome! This is the Grace Charis official fan card system.
-                        <br><br>
-                        If you received a personalized fan card link, please use that link to view your exclusive digital fan card.
-                        <br><br>
-                        <span style="color: #999; font-size: 14px;">Don't have a fan card yet? Contact your administrator to get registered!</span>
-                    </p>
-                </div>
-            `;
-        }
-
-        function copyLink(link, event) {
-            navigator.clipboard.writeText(link).then(() => {
-                const btn = event.target;
-                const originalText = btn.textContent;
-                btn.textContent = '✅ Link Copied to Clipboard!';
-                btn.style.background = '#218838';
-                setTimeout(() => {
-                    btn.textContent = originalText;
-                    btn.style.background = '';
-                }, 3000);
-            });
-        }
+        window.onload = function() {
+            load();
+            const params = new URLSearchParams(window.location.search);
+            const id = params.get('fan');
+            
+            if (id && db[id]) {
+                show(id);
+            } else if (id) {
+                document.getElementById('content').innerHTML = `
+                    <div style="text-align:center;padding:50px">
+                        <h2 style="color:#dc3545;margin-bottom:15px">❌ Fan Card Not Found</h2>
+                        <p style="color:#666">This fan card doesn't exist or has been removed.</p>
+                    </div>
+                `;
+            } else {
+                document.getElementById('content').innerHTML = `
+                    <div style="text-align:center;padding:40px">
+                        <h1 style="color:#667eea;margin-bottom:20px;font-size:32px">🌟 Grace Charis Fan Cards</h1>
+                        <p style="font-size:16px;color:#666;line-height:1.8">
+                            Welcome! This is the Grace Charis official fan card system.
+                            <br><br>
+                            If you received a personalized fan card link, please use that link to view your exclusive digital fan card.
+                            <br><br>
+                            <span style="color:#999;font-size:14px">Don't have a fan card yet? Contact your administrator!</span>
+                        </p>
+                    </div>
+                `;
+            }
+        };
     </script>
 </body>
 </html>
