@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grace Charis Fan Card</title>
+    <title>Your Fan Card</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -129,57 +129,6 @@
     </div>
 
     <script>
-        let db = {};
-        let celeb = {
-            name: 'Grace Charis',
-            photo: 'https://cdn.i-scmp.com/sites/default/files/styles/768x768/public/d8/images/canvas/2025/04/23/e7b3bcfa-41b4-40ac-bff9-a46437a13cd7_8140c932.jpg?itok=a5KQpa_I&v=1745377355'
-        };
-
-        function load() {
-            const d = localStorage.getItem('fanData');
-            if (d) {
-                const p = JSON.parse(d);
-                db = p.fans || {};
-                celeb = p.celeb || celeb;
-            }
-        }
-
-        function show(id) {
-            const f = db[id];
-            const link = window.location.href;
-            const photo = celeb.photo || 'https://via.placeholder.com/150/667eea/ffffff?text=Photo';
-            
-            document.getElementById('content').innerHTML = `
-                <div class="welcome">✨ Your Exclusive Fan Card ✨</div>
-                <div class="card-wrapper">
-                    <div class="fan-card">
-                        <div class="card-face card-front">
-                            <img src="${photo}" class="celeb-photo">
-                            <div class="fan-name">${f.name}</div>
-                            <div class="card-title">Official Fan</div>
-                            <div class="celeb-name">${celeb.name}</div>
-                        </div>
-                        <div class="card-face card-back">
-                            <img src="${photo}" class="celeb-photo">
-                            <div class="card-title">Thank you for your support!</div>
-                            <div class="celeb-name">${celeb.name}</div>
-                            <div style="margin-top:20px;font-size:14px;opacity:0.9">
-                                You're part of something special ✨
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="link-box">
-                    <strong style="display:block;margin-bottom:8px;color:#333">📌 Your Personal Link:</strong>
-                    <div class="link-display">${link}</div>
-                    <button onclick="copyLink()">📋 Copy & Save This Link</button>
-                    <p style="margin-top:12px;font-size:13px;color:#666;text-align:center">
-                        Bookmark this link to view your card anytime!
-                    </p>
-                </div>
-            `;
-        }
-
         function copyLink() {
             navigator.clipboard.writeText(window.location.href);
             event.target.textContent = '✅ Link Copied!';
@@ -191,17 +140,42 @@
         }
 
         window.onload = function() {
-            load();
             const params = new URLSearchParams(window.location.search);
-            const id = params.get('fan');
+            const fanName = params.get('name');
+            const celebName = params.get('celeb');
+            const celebPhoto = params.get('photo');
             
-            if (id && db[id]) {
-                show(id);
-            } else if (id) {
+            if (fanName && celebName) {
+                const link = window.location.href;
+                const photo = celebPhoto || 'https://via.placeholder.com/150/667eea/ffffff?text=Photo';
+                
                 document.getElementById('content').innerHTML = `
-                    <div style="text-align:center;padding:50px">
-                        <h2 style="color:#dc3545;margin-bottom:15px">❌ Fan Card Not Found</h2>
-                        <p style="color:#666">This fan card doesn't exist or has been removed.</p>
+                    <div class="welcome">✨ Your Exclusive Fan Card ✨</div>
+                    <div class="card-wrapper">
+                        <div class="fan-card">
+                            <div class="card-face card-front">
+                                <img src="${photo}" class="celeb-photo" onerror="this.src='https://via.placeholder.com/150/667eea/ffffff?text=Photo'">
+                                <div class="fan-name">${fanName}</div>
+                                <div class="card-title">Official Fan</div>
+                                <div class="celeb-name">${celebName}</div>
+                            </div>
+                            <div class="card-face card-back">
+                                <img src="${photo}" class="celeb-photo" onerror="this.src='https://via.placeholder.com/150/667eea/ffffff?text=Photo'">
+                                <div class="card-title">Thank you for your support!</div>
+                                <div class="celeb-name">${celebName}</div>
+                                <div style="margin-top:20px;font-size:14px;opacity:0.9">
+                                    You're part of something special ✨
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="link-box">
+                        <strong style="display:block;margin-bottom:8px;color:#333">📌 Your Personal Link:</strong>
+                        <div class="link-display">${link}</div>
+                        <button onclick="copyLink()">📋 Copy & Save This Link</button>
+                        <p style="margin-top:12px;font-size:13px;color:#666;text-align:center">
+                            Bookmark this link to view your card anytime!
+                        </p>
                     </div>
                 `;
             } else {
