@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -87,6 +88,10 @@
 
         button:hover {
             transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
         }
 
         .message {
@@ -214,10 +219,10 @@
 
             <div class="input-group">
                 <label for="adminPassword">Enter Admin Password:</label>
-                <input type="password" id="adminPassword" placeholder="Enter password" onkeypress="if(event.key==='Enter') login()">
+                <input type="password" id="adminPassword" placeholder="Enter password">
             </div>
 
-            <button onclick="login()">🔓 Login</button>
+            <button type="button" id="loginBtn">🔓 Login</button>
 
             <p style="text-align: center; color: #999; font-size: 13px; margin-top: 15px;">
                 Default password: <code style="background: #f0f0f0; padding: 2px 6px; border-radius: 3px;">admin123</code>
@@ -259,14 +264,14 @@
 
             <div class="input-group">
                 <label for="fanName">Fan Name:</label>
-                <input type="text" id="fanName" placeholder="Enter fan name to register" onkeypress="if(event.key==='Enter') registerFan()">
+                <input type="text" id="fanName" placeholder="Enter fan name to register">
             </div>
 
-            <button onclick="registerFan()">➕ Register Fan & Generate Link</button>
+            <button type="button" id="registerBtn">➕ Register Fan & Generate Link</button>
 
             <div class="user-list" id="userList"></div>
 
-            <button class="logout-btn" onclick="logout()">🚪 Logout</button>
+            <button type="button" class="logout-btn" id="logoutBtn">🚪 Logout</button>
         </div>
     </div>
 
@@ -279,6 +284,47 @@
             name: 'Grace Charis',
             photo: 'https://cdn.i-scmp.com/sites/default/files/styles/768x768/public/d8/images/canvas/2025/04/23/e7b3bcfa-41b4-40ac-bff9-a46437a13cd7_8140c932.jpg?itok=a5KQpa_I&v=1745377355'
         };
+
+        // Wait for page to load
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Page loaded - Setting up event listeners');
+            
+            // Check if already logged in
+            const loggedIn = localStorage.getItem('adminLoggedIn');
+            if (loggedIn === 'true') {
+                showAdminPanel();
+            }
+
+            // Login button
+            document.getElementById('loginBtn').addEventListener('click', function() {
+                console.log('Login button clicked');
+                login();
+            });
+
+            // Enter key on password field
+            document.getElementById('adminPassword').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    login();
+                }
+            });
+
+            // Register button
+            document.getElementById('registerBtn').addEventListener('click', function() {
+                registerFan();
+            });
+
+            // Enter key on fan name field
+            document.getElementById('fanName').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    registerFan();
+                }
+            });
+
+            // Logout button
+            document.getElementById('logoutBtn').addEventListener('click', function() {
+                logout();
+            });
+        });
 
         async function loadData() {
             const localData = localStorage.getItem('fanCardData');
@@ -313,18 +359,26 @@
         }
 
         function login() {
+            console.log('Login function called');
             const password = document.getElementById('adminPassword').value;
+            console.log('Password entered:', password.length > 0 ? 'Yes' : 'No');
             
             if (password === ADMIN_PASSWORD) {
+                console.log('Password correct!');
                 localStorage.setItem('adminLoggedIn', 'true');
-                document.getElementById('loginSection').classList.add('hidden');
-                document.getElementById('adminSection').classList.remove('hidden');
-                loadData();
-                updateUserList();
-                updateStats();
+                showAdminPanel();
             } else {
-                showLoginMessage('❌ Incorrect password', 'error');
+                console.log('Password incorrect');
+                showLoginMessage('❌ Incorrect password. Try: admin123', 'error');
             }
+        }
+
+        async function showAdminPanel() {
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('adminSection').classList.remove('hidden');
+            await loadData();
+            updateUserList();
+            updateStats();
         }
 
         function logout() {
@@ -333,17 +387,6 @@
             document.getElementById('loginSection').classList.remove('hidden');
             document.getElementById('adminPassword').value = '';
         }
-
-        window.addEventListener('DOMContentLoaded', function() {
-            const loggedIn = localStorage.getItem('adminLoggedIn');
-            if (loggedIn === 'true') {
-                document.getElementById('loginSection').classList.add('hidden');
-                document.getElementById('adminSection').classList.remove('hidden');
-                loadData();
-                updateUserList();
-                updateStats();
-            }
-        });
 
         function generateFanId(name) {
             return name.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Date.now();
@@ -381,6 +424,8 @@
             
             navigator.clipboard.writeText(fanLink).then(() => {
                 showMessage(`✅ ${fanName} registered! Link copied to clipboard.`, 'success');
+            }).catch(() => {
+                showMessage(`✅ ${fanName} registered! Link: ${fanLink}`, 'success');
             });
             
             document.getElementById('fanName').value = '';
@@ -409,8 +454,12 @@
                 return;
             }
 
+            const sortedFanIds = fanIds.sort((a, b) => {
+                return new Date(fanDatabase[b].registeredDate) - new Date(fanDatabase[a].registeredDate);
+            });
+
             userList.innerHTML = '<strong style="display: block; margin-bottom: 15px; font-size: 16px; color: #333;">📋 Registered Fans (' + fanIds.length + '):</strong>' + 
-                fanIds.reverse().map(fanId => {
+                sortedFanIds.map(fanId => {
                     const fan = fanDatabase[fanId];
                     const baseUrl = window.location.origin + window.location.pathname.replace('admin.html', 'index.html');
                     const fanLink = `${baseUrl}?fan=${fanId}`;
@@ -429,6 +478,9 @@
         }
 
         function copyFanLink(link, event) {
+            event.preventDefault();
+            event.stopPropagation();
+            
             navigator.clipboard.writeText(link).then(() => {
                 const btn = event.target;
                 const originalText = btn.innerHTML;
