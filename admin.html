@@ -10,17 +10,15 @@
             font-family: Arial, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
             padding: 20px;
         }
-        .container { max-width: 600px; width: 100%; }
+        .container { max-width: 900px; margin: 0 auto; }
         .section {
             background: white;
             border-radius: 20px;
             padding: 30px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            margin-bottom: 20px;
         }
         .header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -31,6 +29,7 @@
             text-align: center;
         }
         h1 { font-size: 28px; margin-bottom: 5px; }
+        h2 { font-size: 22px; color: #667eea; margin-bottom: 15px; }
         .input-group { margin-bottom: 15px; }
         label {
             display: block;
@@ -38,14 +37,19 @@
             color: #333;
             font-weight: bold;
         }
-        input, select {
+        input, select, textarea {
             width: 100%;
             padding: 12px;
             border: 2px solid #e0e0e0;
             border-radius: 8px;
             font-size: 16px;
+            font-family: Arial;
         }
-        input:focus, select:focus {
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        input:focus, select:focus, textarea:focus {
             outline: none;
             border-color: #667eea;
         }
@@ -67,16 +71,8 @@
             margin-bottom: 15px;
             text-align: center;
         }
-        .success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        .error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
         .user-list {
             max-height: 400px;
             overflow-y: auto;
@@ -125,6 +121,7 @@
         .view-btn { background: #667eea; }
         .copy-btn { background: #28a745; }
         .delete-btn { background: #dc3545; }
+        .chat-btn { background: #17a2b8; }
         .stats {
             display: flex;
             gap: 15px;
@@ -143,10 +140,7 @@
             color: #667eea;
         }
         .hidden { display: none; }
-        .logout-btn {
-            background: #dc3545;
-            margin-top: 20px;
-        }
+        .logout-btn { background: #dc3545; margin-top: 20px; }
         .card-type-selector {
             display: flex;
             gap: 10px;
@@ -169,6 +163,53 @@
         .card-type-btn.gold.active {
             border-color: #FFD700;
             background: #fff9e6;
+        }
+        .chat-window {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+        }
+        .chat-message {
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            max-width: 80%;
+        }
+        .chat-message.fan {
+            background: #e3f2fd;
+            margin-left: 0;
+            margin-right: auto;
+        }
+        .chat-message.admin {
+            background: #e8eaf6;
+            margin-left: auto;
+            margin-right: 0;
+        }
+        .chat-sender {
+            font-weight: bold;
+            font-size: 12px;
+            margin-bottom: 5px;
+            color: #666;
+        }
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .tab {
+            padding: 12px 24px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            color: #666;
+        }
+        .tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
         }
     </style>
 </head>
@@ -195,60 +236,96 @@
                 <h1>🔐 Admin Panel</h1>
                 <p style="font-size: 14px; opacity: 0.9;">Grace Charis Fan Card Manager</p>
             </div>
-            <div id="msg"></div>
-            <div class="stats">
-                <div class="stat-card">
-                    <div class="stat-number" id="total">0</div>
-                    <div style="font-size: 12px; color: #666; margin-top: 5px;">Total Fans</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="goldCount">0</div>
-                    <div style="font-size: 12px; color: #666; margin-top: 5px;">Gold VIPs</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="today">0</div>
-                    <div style="font-size: 12px; color: #666; margin-top: 5px;">Today</div>
-                </div>
+
+            <div class="tabs">
+                <div class="tab active" onclick="switchTab('fans')">👥 Fans</div>
+                <div class="tab" onclick="switchTab('chat')">💬 Chat</div>
+                <div class="tab" onclick="switchTab('video')">🎥 Live Video</div>
             </div>
 
-            <div class="input-group">
-                <label>Background Music URL (Optional):</label>
-                <input type="text" id="musicUrl" placeholder="https://example.com/music.mp3">
-                <small style="color: #666; display: block; margin-top: 5px;">
-                    MP3 file URL - Will play on all fan cards
-                </small>
-            </div>
-
-            <div class="input-group">
-                <label>Celebrity Name:</label>
-                <input type="text" id="cname" value="Grace Charis">
-            </div>
-            <div class="input-group">
-                <label>Celebrity Photo URL:</label>
-                <input type="text" id="cphoto" value="https://cdn.i-scmp.com/sites/default/files/styles/768x768/public/d8/images/canvas/2025/04/23/e7b3bcfa-41b4-40ac-bff9-a46437a13cd7_8140c932.jpg?itok=a5KQpa_I&v=1745377355">
-            </div>
-
-            <div class="input-group">
-                <label>Card Type:</label>
-                <div class="card-type-selector">
-                    <div class="card-type-btn active" id="regularBtn" onclick="selectCardType('regular')">
-                        <div style="font-size: 24px;">💜</div>
-                        <div style="font-weight: bold; margin-top: 5px;">Regular</div>
+            <!-- FANS TAB -->
+            <div id="fansTab">
+                <div id="msg"></div>
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="stat-number" id="total">0</div>
+                        <div style="font-size: 12px; color: #666; margin-top: 5px;">Total Fans</div>
                     </div>
-                    <div class="card-type-btn gold" id="goldBtn" onclick="selectCardType('gold')">
-                        <div style="font-size: 24px;">👑</div>
-                        <div style="font-weight: bold; margin-top: 5px;">Gold VIP</div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="goldCount">0</div>
+                        <div style="font-size: 12px; color: #666; margin-top: 5px;">Gold VIPs</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="today">0</div>
+                        <div style="font-size: 12px; color: #666; margin-top: 5px;">Today</div>
                     </div>
                 </div>
+
+                <div class="input-group">
+                    <label>Celebrity Name:</label>
+                    <input type="text" id="cname" value="Grace Charis">
+                </div>
+                <div class="input-group">
+                    <label>Celebrity Photo URL:</label>
+                    <input type="text" id="cphoto" value="https://cdn.i-scmp.com/sites/default/files/styles/768x768/public/d8/images/canvas/2025/04/23/e7b3bcfa-41b4-40ac-bff9-a46437a13cd7_8140c932.jpg?itok=a5KQpa_I&v=1745377355">
+                </div>
+
+                <div class="input-group">
+                    <label>Card Type:</label>
+                    <div class="card-type-selector">
+                        <div class="card-type-btn active" id="regularBtn" onclick="selectCardType('regular')">
+                            <div style="font-size: 24px;">💜</div>
+                            <div style="font-weight: bold; margin-top: 5px;">Regular</div>
+                        </div>
+                        <div class="card-type-btn gold" id="goldBtn" onclick="selectCardType('gold')">
+                            <div style="font-size: 24px;">👑</div>
+                            <div style="font-weight: bold; margin-top: 5px;">Gold VIP</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>Fan Name:</label>
+                    <input type="text" id="fname" placeholder="Enter fan name">
+                </div>
+                <button onclick="addFan()">➕ Register Fan & Generate Link</button>
+                <div class="user-list" id="list"></div>
+                <button class="logout-btn" onclick="doLogout()">🚪 Logout</button>
             </div>
 
-            <div class="input-group">
-                <label>Fan Name:</label>
-                <input type="text" id="fname" placeholder="Enter fan name">
+            <!-- CHAT TAB -->
+            <div id="chatTab" class="hidden">
+                <h2>💬 Fan Messages</h2>
+                <div class="input-group">
+                    <label>Select Fan:</label>
+                    <select id="chatFanSelect" onchange="loadChat()">
+                        <option value="">-- Select a fan --</option>
+                    </select>
+                </div>
+                <div class="chat-window" id="chatWindow"></div>
+                <div class="input-group">
+                    <textarea id="adminMessage" placeholder="Type your message..."></textarea>
+                </div>
+                <button onclick="sendAdminMessage()">📤 Send Message</button>
             </div>
-            <button onclick="addFan()">➕ Register Fan & Generate Link</button>
-            <div class="user-list" id="list"></div>
-            <button class="logout-btn" onclick="doLogout()">🚪 Logout</button>
+
+            <!-- VIDEO TAB -->
+            <div id="videoTab" class="hidden">
+                <h2>🎥 "Live" Video Settings</h2>
+                <div class="input-group">
+                    <label>Video URL (YouTube, Vimeo, or direct MP4):</label>
+                    <input type="text" id="videoUrl" placeholder="https://www.youtube.com/embed/VIDEO_ID">
+                    <small style="color: #666; display: block; margin-top: 5px;">
+                        For YouTube: Use embed URL (right-click video → Copy embed code → extract URL)
+                    </small>
+                </div>
+                <div class="input-group">
+                    <label>Video Title:</label>
+                    <input type="text" id="videoTitle" placeholder="Grace's Live Session" value="🔴 LIVE: Grace's Exclusive Fan Update">
+                </div>
+                <button onclick="saveVideo()">💾 Save Video Settings</button>
+                <div id="videoMsg"></div>
+            </div>
         </div>
     </div>
 
@@ -258,9 +335,30 @@
         let celeb = {
             name: 'Grace Charis',
             photo: 'https://cdn.i-scmp.com/sites/default/files/styles/768x768/public/d8/images/canvas/2025/04/23/e7b3bcfa-41b4-40ac-bff9-a46437a13cd7_8140c932.jpg?itok=a5KQpa_I&v=1745377355',
-            music: ''
+            video: '',
+            videoTitle: '🔴 LIVE: Grace\'s Exclusive Fan Update'
         };
         let selectedCardType = 'regular';
+        let chats = {};
+        let currentChatFan = '';
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab')[tab === 'fans' ? 0 : tab === 'chat' ? 1 : 2].classList.add('active');
+            
+            document.getElementById('fansTab').classList.add('hidden');
+            document.getElementById('chatTab').classList.add('hidden');
+            document.getElementById('videoTab').classList.add('hidden');
+            
+            document.getElementById(tab + 'Tab').classList.remove('hidden');
+            
+            if (tab === 'chat') {
+                updateChatFanList();
+            } else if (tab === 'video') {
+                document.getElementById('videoUrl').value = celeb.video || '';
+                document.getElementById('videoTitle').value = celeb.videoTitle || '';
+            }
+        }
 
         function selectCardType(type) {
             selectedCardType = type;
@@ -275,14 +373,14 @@
                 const p = JSON.parse(d);
                 db = p.fans || {};
                 celeb = p.celeb || celeb;
+                chats = p.chats || {};
             }
             document.getElementById('cname').value = celeb.name;
             document.getElementById('cphoto').value = celeb.photo;
-            document.getElementById('musicUrl').value = celeb.music || '';
         }
 
         function save() {
-            localStorage.setItem('fanData', JSON.stringify({fans: db, celeb: celeb}));
+            localStorage.setItem('fanData', JSON.stringify({fans: db, celeb: celeb, chats: chats}));
         }
 
         function doLogin() {
@@ -307,7 +405,6 @@
             const fn = document.getElementById('fname').value.trim();
             const cn = document.getElementById('cname').value.trim();
             const cp = document.getElementById('cphoto').value.trim();
-            const music = document.getElementById('musicUrl').value.trim();
             
             if (!fn) {
                 msg('❌ Enter fan name', 'error');
@@ -316,7 +413,6 @@
             
             celeb.name = cn;
             celeb.photo = cp;
-            celeb.music = music;
             save();
             
             const id = fn.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Date.now();
@@ -325,6 +421,8 @@
                 date: new Date().toISOString(),
                 type: selectedCardType
             };
+            
+            chats[id] = [];
             save();
             
             const baseUrl = window.location.origin + window.location.pathname.replace('admin.html', 'index.html');
@@ -333,7 +431,7 @@
                 celeb: cn,
                 photo: cp,
                 type: selectedCardType,
-                music: music
+                fanId: id
             });
             const link = baseUrl + '?' + params.toString();
             
@@ -344,6 +442,69 @@
             document.getElementById('fname').value = '';
             selectCardType('regular');
             refresh();
+        }
+
+        function saveVideo() {
+            celeb.video = document.getElementById('videoUrl').value.trim();
+            celeb.videoTitle = document.getElementById('videoTitle').value.trim();
+            save();
+            document.getElementById('videoMsg').innerHTML = '<div class="message success">✅ Video settings saved!</div>';
+            setTimeout(() => document.getElementById('videoMsg').innerHTML = '', 3000);
+        }
+
+        function updateChatFanList() {
+            const select = document.getElementById('chatFanSelect');
+            select.innerHTML = '<option value="">-- Select a fan --</option>';
+            Object.keys(db).forEach(id => {
+                const option = document.createElement('option');
+                option.value = id;
+                option.textContent = db[id].name;
+                select.appendChild(option);
+            });
+        }
+
+        function loadChat() {
+            currentChatFan = document.getElementById('chatFanSelect').value;
+            if (!currentChatFan) return;
+            
+            const messages = chats[currentChatFan] || [];
+            const chatWindow = document.getElementById('chatWindow');
+            
+            if (messages.length === 0) {
+                chatWindow.innerHTML = '<p style="text-align:center;color:#666;padding:20px">No messages yet</p>';
+                return;
+            }
+            
+            chatWindow.innerHTML = messages.map(m => `
+                <div class="chat-message ${m.from}">
+                    <div class="chat-sender">${m.from === 'fan' ? db[currentChatFan].name : 'Grace Charis'}</div>
+                    <div>${m.text}</div>
+                    <div style="font-size:11px;color:#999;margin-top:5px">${new Date(m.time).toLocaleString()}</div>
+                </div>
+            `).join('');
+            
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        }
+
+        function sendAdminMessage() {
+            if (!currentChatFan) {
+                alert('Please select a fan first');
+                return;
+            }
+            
+            const text = document.getElementById('adminMessage').value.trim();
+            if (!text) return;
+            
+            if (!chats[currentChatFan]) chats[currentChatFan] = [];
+            chats[currentChatFan].push({
+                from: 'admin',
+                text: text,
+                time: new Date().toISOString()
+            });
+            
+            save();
+            document.getElementById('adminMessage').value = '';
+            loadChat();
         }
 
         function refresh() {
@@ -364,7 +525,6 @@
             
             const cn = celeb.name;
             const cp = celeb.photo;
-            const music = celeb.music;
             
             document.getElementById('list').innerHTML = '<strong style="display:block;margin-bottom:15px">📋 Fans (' + ids.length + '):</strong>' +
                 ids.reverse().map(i => {
@@ -375,7 +535,7 @@
                         celeb: cn,
                         photo: cp,
                         type: f.type || 'regular',
-                        music: music
+                        fanId: i
                     });
                     const link = baseUrl + '?' + params.toString();
                     const isGold = f.type === 'gold';
@@ -413,6 +573,7 @@
         function del(id) {
             if (confirm('Delete ' + db[id].name + '?')) {
                 delete db[id];
+                delete chats[id];
                 save();
                 refresh();
             }
