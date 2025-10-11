@@ -56,6 +56,35 @@
             0%, 100% { transform: scale(1); }
             50% { transform: scale(1.05); }
         }
+        .video-section {
+            margin: 25px 0;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .live-badge {
+            background: #ff0000;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 15px;
+            animation: pulse 2s infinite;
+        }
+        .live-dot {
+            width: 10px;
+            height: 10px;
+            background: white;
+            border-radius: 50%;
+            animation: blink 1s infinite;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
         .card-wrapper {
             perspective: 1000px;
             margin: 30px 0;
@@ -130,6 +159,69 @@
             font-weight: bold;
             margin-top: 10px;
         }
+        .chat-container {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 25px 0;
+        }
+        .gold-theme .chat-container {
+            background: linear-gradient(to right, #fff9e6, #fffaed);
+            border: 2px solid #FFD700;
+        }
+        .chat-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .gold-theme .chat-title {
+            color: #FF8C00;
+        }
+        .chat-messages {
+            max-height: 300px;
+            overflow-y: auto;
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        .chat-msg {
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            max-width: 80%;
+        }
+        .chat-msg.fan {
+            background: #e3f2fd;
+            margin-left: 0;
+            margin-right: auto;
+        }
+        .chat-msg.admin {
+            background: #fff3cd;
+            margin-left: auto;
+            margin-right: 0;
+        }
+        .chat-input-box {
+            display: flex;
+            gap: 10px;
+        }
+        .chat-input-box input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        .chat-input-box button {
+            width: auto;
+            padding: 12px 20px;
+            background: #667eea;
+        }
+        .gold-theme .chat-input-box button {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+        }
         .link-box {
             background: #f8f9fa;
             padding: 20px;
@@ -202,7 +294,6 @@
         <div class="card-section" id="content"></div>
     </div>
 
-    <!-- Background Music - Beautiful Uplifting Track -->
     <audio id="bgMusic" loop>
         <source src="https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3" type="audio/mpeg">
     </audio>
@@ -210,6 +301,8 @@
     <script>
         let musicPlaying = false;
         const audio = document.getElementById('bgMusic');
+        let fanId = '';
+        let chats = {};
 
         function toggleMusic() {
             if (musicPlaying) {
@@ -221,6 +314,56 @@
                 event.target.textContent = '🔊 Pause Music';
                 musicPlaying = true;
             }
+        }
+
+        function loadChatData() {
+            const data = localStorage.getItem('fanData');
+            if (data) {
+                const parsed = JSON.parse(data);
+                chats = parsed.chats || {};
+            }
+        }
+
+        function sendFanMessage() {
+            const input = document.getElementById('fanChatInput');
+            const text = input.value.trim();
+            if (!text || !fanId) return;
+            
+            if (!chats[fanId]) chats[fanId] = [];
+            chats[fanId].push({
+                from: 'fan',
+                text: text,
+                time: new Date().toISOString()
+            });
+            
+            const data = JSON.parse(localStorage.getItem('fanData') || '{}');
+            data.chats = chats;
+            localStorage.setItem('fanData', JSON.stringify(data));
+            
+            input.value = '';
+            displayChat();
+        }
+
+        function displayChat() {
+            const messages = chats[fanId] || [];
+            const container = document.getElementById('chatMessages');
+            
+            if (messages.length === 0) {
+                container.innerHTML = '<p style="text-align:center;color:#666;padding:20px">No messages yet. Say hi to Grace!</p>';
+                return;
+            }
+            
+            container.innerHTML = messages.map(m => `
+                <div class="chat-msg ${m.from}">
+                    <div style="font-weight:bold;font-size:12px;margin-bottom:5px;color:#666">
+                        ${m.from === 'fan' ? 'You' : 'Grace Charis'}
+                    </div>
+                    <div>${m.text}</div>
+                    <div style="font-size:11px;color:#999;margin-top:5px">${new Date(m.time).toLocaleString()}</div>
+                </div>
+            `).join('');
+            
+            container.scrollTop = container.scrollHeight;
         }
 
         function copyLink() {
@@ -240,8 +383,20 @@
             const celebName = params.get('celeb');
             const celebPhoto = params.get('photo');
             const cardType = params.get('type') || 'regular';
+            fanId = params.get('fanId') || '';
+            
+            loadChatData();
             
             if (fanName && celebName) {
+                const data = localStorage.getItem('fanData');
+                let videoUrl = '';
+                let videoTitle = '🔴 LIVE: Grace\'s Exclusive Fan Update';
+                if (data) {
+                    const parsed = JSON.parse(data);
+                    videoUrl = parsed.celeb?.video || '';
+                    videoTitle = parsed.celeb?.videoTitle || videoTitle;
+                }
+                
                 const isGold = cardType === 'gold';
                 if (isGold) {
                     document.body.classList.add('gold-theme');
@@ -252,9 +407,22 @@
                 
                 const goldBadge = isGold ? '<div class="vip-badge">👑 GOLD VIP MEMBER 👑</div>' : '';
                 
+                const videoSection = videoUrl ? `
+                    <div class="video-section">
+                        <div class="live-badge">
+                            <div class="live-dot"></div>
+                            ${videoTitle}
+                        </div>
+                        <iframe width="100%" height="280" src="${videoUrl}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="border-radius:10px"></iframe>
+                    </div>
+                ` : '';
+                
                 document.getElementById('content').innerHTML = `
                     ${goldBadge}
                     <div class="welcome">✨ Your Exclusive Fan Card ✨</div>
+                    
+                    ${videoSection}
+                    
                     <div class="card-wrapper">
                         <div class="fan-card">
                             <div class="card-face card-front">
@@ -274,9 +442,20 @@
                             </div>
                         </div>
                     </div>
+                    
                     <div class="music-control">
                         <button class="music-btn" onclick="toggleMusic()">🔊 Play Music</button>
                     </div>
+                    
+                    <div class="chat-container">
+                        <div class="chat-title">💬 Chat with Grace</div>
+                        <div class="chat-messages" id="chatMessages"></div>
+                        <div class="chat-input-box">
+                            <input type="text" id="fanChatInput" placeholder="Type your message..." onkeypress="if(event.key==='Enter') sendFanMessage()">
+                            <button onclick="sendFanMessage()">📤 Send</button>
+                        </div>
+                    </div>
+                    
                     <div class="link-box">
                         <strong style="display:block;margin-bottom:8px;color:#333">📌 Your Personal Link:</strong>
                         <div class="link-display">${link}</div>
@@ -286,6 +465,9 @@
                         </p>
                     </div>
                 `;
+                
+                displayChat();
+                
             } else {
                 document.getElementById('content').innerHTML = `
                     <div style="text-align:center;padding:40px">
