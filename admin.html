@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -549,7 +550,7 @@
                 const response = await fetch(SHEET_URL + '?action=get&fanId=' + currentChatFan);
                 const data = await response.json();
                 
-                if (data.status === 'success' && data.messages.length > 0) {
+                if (data.status === 'success' && data.messages && data.messages.length > 0) {
                     document.getElementById('chatWindow').innerHTML = data.messages.map(m => `
                         <div class="chat-message ${m.from}">
                             <div class="chat-sender">${m.from === 'fan' ? db[currentChatFan].name : 'Grace Charis'}</div>
@@ -562,7 +563,8 @@
                     document.getElementById('chatWindow').innerHTML = '<p style="text-align:center;color:#666;padding:20px">No messages yet</p>';
                 }
             } catch (error) {
-                document.getElementById('chatWindow').innerHTML = '<p style="text-align:center;color:#666;padding:20px">Loading messages...</p>';
+                document.getElementById('chatWindow').innerHTML = '<p style="text-align:center;color:#dc3545;padding:20px">Error loading messages. Check console for details.</p>';
+                console.error('Chat error:', error);
             }
         }
 
@@ -581,24 +583,26 @@
             if (!text) return;
             
             try {
-                await fetch(SHEET_URL, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({
-                        action: 'send',
-                        fanId: currentChatFan,
-                        fanName: db[currentChatFan].name,
-                        message: text,
-                        from: 'admin'
-                    })
+                const params = new URLSearchParams({
+                    action: 'send',
+                    fanId: currentChatFan,
+                    fanName: db[currentChatFan].name,
+                    message: text,
+                    from: 'admin'
+                });
+                
+                await fetch(SHEET_URL + '?' + params.toString(), {
+                    method: 'GET',
+                    mode: 'no-cors'
                 });
                 
                 msg('✅ Message sent!', 'success');
                 document.getElementById('adminMessage').value = '';
-                setTimeout(() => loadChat(), 1000);
+                setTimeout(() => loadChat(), 2000);
                 
             } catch (error) {
-                msg('❌ Error sending message', 'error');
+                msg('❌ Error: ' + error.message, 'error');
+                console.error('Send error:', error);
             }
         }
 
