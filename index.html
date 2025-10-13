@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -285,6 +286,22 @@
             background: linear-gradient(135deg, #FFD700, #FFA500);
         }
         .music-btn:hover { opacity: 0.9; }
+        .message-status {
+            text-align: center;
+            padding: 8px;
+            margin-top: 10px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .message-status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .message-status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
     </style>
 </head>
 <body>
@@ -292,196 +309,229 @@
         <div class="card-section" id="content"></div>
     </div>
 
-    <audio id="bgMusic" loop>
-        <source src="https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3" type="audio/mpeg">
-    </audio>
-    <script>
-        let musicPlaying = false;
-        const audio = document.getElementById('bgMusic');
-        let fanId = '';
-        let sheetUrl = '';
+```
+<audio id="bgMusic" loop>
+    <source src="https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3" type="audio/mpeg">
+</audio>
+<script>
+    let musicPlaying = false;
+    const audio = document.getElementById('bgMusic');
+    let fanId = '';
+    let sheetUrl = '';
+    let fanName = '';
 
-        function toggleMusic() {
-            if (musicPlaying) {
-                audio.pause();
-                event.target.textContent = '🔇 Play Music';
-                musicPlaying = false;
-            } else {
-                audio.play();
-                event.target.textContent = '🔊 Pause Music';
-                musicPlaying = true;
-            }
+    function toggleMusic() {
+        if (musicPlaying) {
+            audio.pause();
+            event.target.textContent = '🔇 Play Music';
+            musicPlaying = false;
+        } else {
+            audio.play();
+            event.target.textContent = '🔊 Pause Music';
+            musicPlaying = true;
         }
+    }
 
-        async function loadChat() {
-            if (!sheetUrl || !fanId) return;
-            
-            try {
-                const response = await fetch(sheetUrl + '?action=get&fanId=' + fanId);
-                const data = await response.json();
-                
-                const container = document.getElementById('chatMessages');
-                
-                if (data.status === 'success' && data.messages && data.messages.length > 0) {
-                    container.innerHTML = data.messages.map(m => `
-                        <div class="chat-msg ${m.from}">
-                            <div style="font-weight:bold;font-size:12px;margin-bottom:5px;color:#666">
-                                ${m.from === 'fan' ? 'You' : 'Grace Charis'}
-                            </div>
-                            <div>${m.message}</div>
-                            <div style="font-size:11px;color:#999;margin-top:5px">${new Date(m.timestamp).toLocaleString()}</div>
-                        </div>
-                    `).join('');
-                    container.scrollTop = container.scrollHeight;
-                } else {
-                    container.innerHTML = '<p style="text-align:center;color:#666;padding:20px">No messages yet. Say hi to Grace!</p>';
-                }
-            } catch (error) {
-                console.error('Chat load error:', error);
-                document.getElementById('chatMessages').innerHTML = '<p style="text-align:center;color:#666;padding:20px">Loading messages...</p>';
-            }
-        }
-
-        async function sendFanMessage() {
-            const input = document.getElementById('fanChatInput');
-            const text = input.value.trim();
-            if (!text || !sheetUrl || !fanId) return;
-            
-            const fanName = new URLSearchParams(window.location.search).get('name');
-            
-            try {
-                const params = new URLSearchParams({
-                    action: 'send',
-                    fanId: fanId,
-                    fanName: fanName,
-                    message: text,
-                    from: 'fan'
-                });
-                
-                await fetch(sheetUrl + '?' + params.toString(), {
-                    method: 'GET',
-                    mode: 'no-cors'
-                });
-                
-                input.value = '';
-                setTimeout(() => loadChat(), 2000);
-            } catch (error) {
-                console.error('Send error:', error);
-            }
-        }
-
-        function copyLink() {
-            navigator.clipboard.writeText(window.location.href);
-            event.target.textContent = '✅ Link Copied!';
-            const isGold = document.body.classList.contains('gold-theme');
-            event.target.style.background = isGold ? '#FF8C00' : '#218838';
+    function showMessageStatus(message, type) {
+        const statusDiv = document.getElementById('messageStatus');
+        if (statusDiv) {
+            statusDiv.className = 'message-status ' + type;
+            statusDiv.textContent = message;
+            statusDiv.style.display = 'block';
             setTimeout(() => {
-                event.target.textContent = '📋 Copy & Save This Link';
-                event.target.style.background = '';
+                statusDiv.style.display = 'none';
             }, 3000);
         }
+    }
 
-        window.onload = function() {
-            const params = new URLSearchParams(window.location.search);
-            const fanName = params.get('name');
-            const celebName = params.get('celeb');
-            const celebPhoto = params.get('photo');
-            const cardType = params.get('type') || 'regular';
-            const videoUrl = params.get('video');
-            const videoTitle = params.get('videoTitle') || '🔴 LIVE: Grace\'s Exclusive Fan Update';
-            fanId = params.get('fanId') || '';
-            sheetUrl = params.get('sheet') || '';
+    async function loadChat() {
+        if (!sheetUrl || !fanId) {
+            console.log('Missing sheetUrl or fanId');
+            return;
+        }
+        
+        try {
+            const url = sheetUrl + '?action=get&fanId=' + encodeURIComponent(fanId) + '&t=' + Date.now();
+            console.log('Loading chat from:', url);
             
-            if (fanName && celebName) {
-                const isGold = cardType === 'gold';
-                if (isGold) {
-                    document.body.classList.add('gold-theme');
-                }
-
-                const link = window.location.href;
-                const photo = celebPhoto || 'https://via.placeholder.com/150/667eea/ffffff?text=Photo';
-                
-                const goldBadge = isGold ? '<div class="vip-badge">👑 GOLD VIP MEMBER 👑</div>' : '';
-                
-                const videoSection = videoUrl ? `
-                    <div class="video-section">
-                        <div class="live-badge">
-                            <div class="live-dot"></div>
-                            ${videoTitle}
+            const response = await fetch(url);
+            const text = await response.text();
+            console.log('Response:', text);
+            
+            const data = JSON.parse(text);
+            console.log('Parsed data:', data);
+            
+            const container = document.getElementById('chatMessages');
+            
+            if (data.status === 'success' && data.messages && data.messages.length > 0) {
+                container.innerHTML = data.messages.map(m => `
+                    <div class="chat-msg ${m.from}">
+                        <div style="font-weight:bold;font-size:12px;margin-bottom:5px;color:#666">
+                            ${m.from === 'fan' ? 'You' : 'Grace Charis'}
                         </div>
-                        <iframe width="100%" height="280" src="${videoUrl}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,0.2);"></iframe>
+                        <div>${m.message}</div>
+                        <div style="font-size:11px;color:#999;margin-top:5px">${new Date(m.timestamp).toLocaleString()}</div>
                     </div>
-                ` : '';
-                
-                document.getElementById('content').innerHTML = `
-                    ${goldBadge}
-                    <div class="welcome">✨ Your Exclusive Fan Card ✨</div>
-                    
-                    ${videoSection}
-                    
-                    <div class="card-wrapper">
-                        <div class="fan-card">
-                            <div class="card-face card-front">
-                                <img src="${photo}" class="celeb-photo" onerror="this.src='https://via.placeholder.com/150/667eea/ffffff?text=Photo'">
-                                <div class="fan-name">${fanName}</div>
-                                <div class="card-title">${isGold ? 'Gold VIP Fan' : 'Official Fan'}</div>
-                                <div class="celeb-name">${celebName}</div>
-                                ${isGold ? '<div style="margin-top:10px;font-size:16px;">👑</div>' : ''}
-                            </div>
-                            <div class="card-face card-back">
-                                <img src="${photo}" class="celeb-photo" onerror="this.src='https://via.placeholder.com/150/667eea/ffffff?text=Photo'">
-                                <div class="card-title">Thank you for your ${isGold ? 'VIP ' : ''}support!</div>
-                                <div class="celeb-name">${celebName}</div>
-                                <div style="margin-top:20px;font-size:14px;opacity:0.9">
-                                    You're part of something special ✨
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="music-control">
-                        <button class="music-btn" onclick="toggleMusic()">🔊 Play Music</button>
-                    </div>
-                    
-                    <div class="chat-container">
-                        <div class="chat-title">💬 Chat with Grace</div>
-                        <div class="chat-messages" id="chatMessages"></div>
-                        <div class="chat-input-box">
-                            <input type="text" id="fanChatInput" placeholder="Type your message..." onkeypress="if(event.key==='Enter') sendFanMessage()">
-                            <button onclick="sendFanMessage()">📤 Send</button>
-                        </div>
-                    </div>
-                    
-                    <div class="link-box">
-                        <strong style="display:block;margin-bottom:8px;color:#333">📌 Your Personal Link:</strong>
-                        <div class="link-display">${link}</div>
-                        <button onclick="copyLink()">📋 Copy & Save This Link</button>
-                        <p style="margin-top:12px;font-size:13px;color:#666;text-align:center">
-                            Bookmark this link to view your card anytime!
-                        </p>
-                    </div>
-                `;
-                
-                if (sheetUrl && fanId) {
-                    loadChat();
-                    setInterval(loadChat, 5000);
-                }
-                
+                `).join('');
+                container.scrollTop = container.scrollHeight;
             } else {
-                document.getElementById('content').innerHTML = `
-                    <div style="text-align:center;padding:40px">
-                        <h1 style="color:#667eea;margin-bottom:20px;font-size:32px">🌟 Grace Charis Fan Cards</h1>
-                        <p style="font-size:16px;color:#666;line-height:1.8">
-                            Welcome! This is the Grace Charis official fan card system.
-                            <br><br>
-                            If you received a personalized fan card link, please use that link to view your exclusive digital fan card.
-                            <br><br>
-                            <span style="color:#999;font-size:14px">Don't have a fan card yet? Contact your administrator!</span>
-                        </p>
-                    </div>
-                `;
+                container.innerHTML = '<p style="text-align:center;color:#666;padding:20px">No messages yet. Say hi to Grace!</p>';
             }
-        };
-    </script>
+        } catch (error) {
+            console.error('Chat load error:', error);
+            document.getElementById('chatMessages').innerHTML = '<p style="text-align:center;color:#666;padding:20px">Loading messages...</p>';
+        }
+    }
+
+    async function sendFanMessage() {
+        const input = document.getElementById('fanChatInput');
+        const text = input.value.trim();
+        if (!text || !sheetUrl || !fanId) {
+            console.log('Missing data:', {text, sheetUrl, fanId});
+            return;
+        }
+        
+        try {
+            const url = sheetUrl + '?action=send&fanId=' + encodeURIComponent(fanId) + 
+                       '&fanName=' + encodeURIComponent(fanName) + 
+                       '&message=' + encodeURIComponent(text) + 
+                       '&from=fan&t=' + Date.now();
+            
+            console.log('Sending message to:', url);
+            
+            // Use image trick to bypass CORS
+            const img = new Image();
+            img.src = url;
+            
+            showMessageStatus('✅ Message sent!', 'success');
+            input.value = '';
+            
+            // Reload chat after 3 seconds
+            setTimeout(() => loadChat(), 3000);
+            
+        } catch (error) {
+            console.error('Send error:', error);
+            showMessageStatus('❌ Error sending message', 'error');
+        }
+    }
+
+    function copyLink() {
+        navigator.clipboard.writeText(window.location.href);
+        event.target.textContent = '✅ Link Copied!';
+        const isGold = document.body.classList.contains('gold-theme');
+        event.target.style.background = isGold ? '#FF8C00' : '#218838';
+        setTimeout(() => {
+            event.target.textContent = '📋 Copy & Save This Link';
+            event.target.style.background = '';
+        }, 3000);
+    }
+
+    window.onload = function() {
+        const params = new URLSearchParams(window.location.search);
+        fanName = params.get('name');
+        const celebName = params.get('celeb');
+        const celebPhoto = params.get('photo');
+        const cardType = params.get('type') || 'regular';
+        const videoUrl = params.get('video');
+        const videoTitle = params.get('videoTitle') || '🔴 LIVE: Grace\'s Exclusive Fan Update';
+        fanId = params.get('fanId') || '';
+        sheetUrl = params.get('sheet') || '';
+        
+        console.log('Initialized with:', {fanName, fanId, sheetUrl});
+        
+        if (fanName && celebName) {
+            const isGold = cardType === 'gold';
+            if (isGold) {
+                document.body.classList.add('gold-theme');
+            }
+
+            const link = window.location.href;
+            const photo = celebPhoto || 'https://via.placeholder.com/150/667eea/ffffff?text=Photo';
+            
+            const goldBadge = isGold ? '<div class="vip-badge">👑 GOLD VIP MEMBER 👑</div>' : '';
+            
+            const videoSection = videoUrl ? `
+                <div class="video-section">
+                    <div class="live-badge">
+                        <div class="live-dot"></div>
+                        ${videoTitle}
+                    </div>
+                    <iframe width="100%" height="280" src="${videoUrl}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,0.2);"></iframe>
+                </div>
+            ` : '';
+            
+            document.getElementById('content').innerHTML = `
+                ${goldBadge}
+                <div class="welcome">✨ Your Exclusive Fan Card ✨</div>
+                
+                ${videoSection}
+                
+                <div class="card-wrapper">
+                    <div class="fan-card">
+                        <div class="card-face card-front">
+                            <img src="${photo}" class="celeb-photo" onerror="this.src='https://via.placeholder.com/150/667eea/ffffff?text=Photo'">
+                            <div class="fan-name">${fanName}</div>
+                            <div class="card-title">${isGold ? 'Gold VIP Fan' : 'Official Fan'}</div>
+                            <div class="celeb-name">${celebName}</div>
+                            ${isGold ? '<div style="margin-top:10px;font-size:16px;">👑</div>' : ''}
+                        </div>
+                        <div class="card-face card-back">
+                            <img src="${photo}" class="celeb-photo" onerror="this.src='https://via.placeholder.com/150/667eea/ffffff?text=Photo'">
+                            <div class="card-title">Thank you for your ${isGold ? 'VIP ' : ''}support!</div>
+                            <div class="celeb-name">${celebName}</div>
+                            <div style="margin-top:20px;font-size:14px;opacity:0.9">
+                                You're part of something special ✨
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="music-control">
+                    <button class="music-btn" onclick="toggleMusic()">🔊 Play Music</button>
+                </div>
+                
+                <div class="chat-container">
+                    <div class="chat-title">💬 Chat with Grace</div>
+                    <div class="chat-messages" id="chatMessages"></div>
+                    <div class="chat-input-box">
+                        <input type="text" id="fanChatInput" placeholder="Type your message..." onkeypress="if(event.key==='Enter') sendFanMessage()">
+                        <button onclick="sendFanMessage()">📤 Send</button>
+                    </div>
+                    <div id="messageStatus" class="message-status" style="display:none;"></div>
+                </div>
+                
+                <div class="link-box">
+                    <strong style="display:block;margin-bottom:8px;color:#333">📌 Your Personal Link:</strong>
+                    <div class="link-display">${link}</div>
+                    <button onclick="copyLink()">📋 Copy & Save This Link</button>
+                    <p style="margin-top:12px;font-size:13px;color:#666;text-align:center">
+                        Bookmark this link to view your card anytime!
+                    </p>
+                </div>
+            `;
+            
+            if (sheetUrl && fanId) {
+                loadChat();
+                setInterval(loadChat, 10000);
+            }
+            
+        } else {
+            document.getElementById('content').innerHTML = `
+                <div style="text-align:center;padding:40px">
+                    <h1 style="color:#667eea;margin-bottom:20px;font-size:32px">🌟 Grace Charis Fan Cards</h1>
+                    <p style="font-size:16px;color:#666;line-height:1.8">
+                        Welcome! This is the Grace Charis official fan card system.
+                        <br><br>
+                        If you received a personalized fan card link, please use that link to view your exclusive digital fan card.
+                        <br><br>
+                        <span style="color:#999;font-size:14px">Don't have a fan card yet? Contact your administrator!</span>
+                    </p>
+                </div>
+            `;
+        }
+    };
+</script>
+```
+
 </body>
 </html>
