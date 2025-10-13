@@ -263,7 +263,6 @@
             font-weight: bold;
         }
         .status-msg.success { background: #d4edda; color: #155724; }
-        .status-msg.error { background: #f8d7da; color: #721c24; }
     </style>
 </head>
 <body>
@@ -276,7 +275,7 @@
     <script>
         let musicPlaying = false;
         const audio = document.getElementById('bgMusic');
-        let fanId = '', sheetUrl = '', fanName = '';
+        let fanId = '', fanName = '';
 
 ```
     function toggleMusic() {
@@ -291,73 +290,52 @@
         }
     }
 
-    function showStatus(msg, type) {
+    function showStatus(msg) {
         const el = document.getElementById('statusMsg');
         if (el) {
-            el.className = 'status-msg ' + type;
+            el.className = 'status-msg success';
             el.textContent = msg;
             el.style.display = 'block';
-            setTimeout(() => el.style.display = 'none', 3000);
+            setTimeout(() => el.style.display = 'none', 2000);
         }
     }
 
-    async function loadChat() {
-        if (!sheetUrl || !fanId) return;
+    function loadChat() {
+        if (!fanId) return;
         
-        try {
-            const url = `${sheetUrl}?action=get&fanId=${encodeURIComponent(fanId)}&t=${Date.now()}`;
-            const response = await fetch(url);
-            const data = await response.json();
-            
-            const container = document.getElementById('chatMessages');
-            if (data.status === 'success' && data.messages && data.messages.length > 0) {
-                container.innerHTML = data.messages.map(m => `
-                    <div class="chat-msg ${m.from}">
-                        <div class="msg-sender">${m.from === 'fan' ? 'You' : 'Grace Charis'}</div>
-                        <div>${m.message}</div>
-                        <div class="msg-time">${new Date(m.timestamp).toLocaleString()}</div>
-                    </div>
-                `).join('');
-                container.scrollTop = container.scrollHeight;
-            } else {
-                container.innerHTML = '<p style="text-align:center;color:#999;padding:30px">💬 No messages yet. Be the first to say hi!</p>';
-            }
-        } catch (err) {
-            console.error('Load error:', err);
-            document.getElementById('chatMessages').innerHTML = '<p style="text-align:center;color:#dc3545;padding:20px">⚠️ Error loading messages</p>';
+        const messages = JSON.parse(localStorage.getItem('chat_' + fanId) || '[]');
+        const container = document.getElementById('chatMessages');
+        
+        if (messages.length > 0) {
+            container.innerHTML = messages.map(m => `
+                <div class="chat-msg ${m.from}">
+                    <div class="msg-sender">${m.from === 'fan' ? 'You' : 'Grace Charis'}</div>
+                    <div>${m.message}</div>
+                    <div class="msg-time">${new Date(m.time).toLocaleString()}</div>
+                </div>
+            `).join('');
+            container.scrollTop = container.scrollHeight;
+        } else {
+            container.innerHTML = '<p style="text-align:center;color:#999;padding:30px;">💬 No messages yet. Be the first to say hi!</p>';
         }
     }
 
-    async function sendFanMessage() {
+    function sendFanMessage() {
         const input = document.getElementById('fanChatInput');
         const text = input.value.trim();
-        if (!text || !sheetUrl || !fanId) return;
+        if (!text || !fanId) return;
         
-        try {
-            const url = `${sheetUrl}?action=send&fanId=${encodeURIComponent(fanId)}&fanName=${encodeURIComponent(fanName)}&message=${encodeURIComponent(text)}&from=fan&t=${Date.now()}`;
-            
-            // Add message to UI immediately
-            const container = document.getElementById('chatMessages');
-            const msgHtml = `
-                <div class="chat-msg fan">
-                    <div class="msg-sender">You</div>
-                    <div>${text}</div>
-                    <div class="msg-time">Just now</div>
-                </div>
-            `;
-            container.innerHTML += msgHtml;
-            container.scrollTop = container.scrollHeight;
-            
-            // Send to server
-            await fetch(url);
-            input.value = '';
-            showStatus('✅ Message sent!', 'success');
-            
-            setTimeout(loadChat, 2000);
-        } catch (err) {
-            console.error('Send error:', err);
-            showStatus('❌ Failed to send', 'error');
-        }
+        const messages = JSON.parse(localStorage.getItem('chat_' + fanId) || '[]');
+        messages.push({
+            from: 'fan',
+            message: text,
+            time: new Date().toISOString()
+        });
+        localStorage.setItem('chat_' + fanId, JSON.stringify(messages));
+        
+        input.value = '';
+        showStatus('✅ Message sent!');
+        loadChat();
     }
 
     function copyLink() {
@@ -370,12 +348,11 @@
         const params = new URLSearchParams(window.location.search);
         fanName = params.get('name') || '';
         const celebName = params.get('celeb') || '';
-        const celebPhoto = params.get('photo') || '';
+        const celebPhoto = params.get('photo') || 'https://cdn.i-scmp.com/sites/default/files/styles/768x768/public/d8/images/canvas/2025/04/23/e7b3bcfa-41b4-40ac-bff9-a46437a13cd7_8140c932.jpg?itok=a5KQpa_I&v=1745377355';
         const cardType = params.get('type') || 'regular';
         const videoUrl = params.get('video') || '';
         const videoTitle = params.get('videoTitle') || '🔴 LIVE: Grace\'s Exclusive Fan Update';
         fanId = params.get('fanId') || '';
-        sheetUrl = params.get('sheet') || '';
         
         if (fanName && celebName) {
             const isGold = cardType === 'gold';
@@ -396,14 +373,14 @@
                 <div class="card-wrapper">
                     <div class="fan-card">
                         <div class="card-face card-front">
-                            <img src="${celebPhoto}" class="celeb-photo" onerror="this.src='https://via.placeholder.com/150'">
+                            <img src="${celebPhoto}" class="celeb-photo" onerror="this.src='https://via.placeholder.com/150/667eea/ffffff?text=Photo'">
                             <div class="fan-name">${fanName}</div>
                             <div class="card-title">${isGold ? 'Gold VIP Fan' : 'Official Fan'}</div>
                             <div class="celeb-name">${celebName}</div>
                             ${isGold ? '<div style="font-size:20px;margin-top:10px;">👑</div>' : ''}
                         </div>
                         <div class="card-face card-back">
-                            <img src="${celebPhoto}" class="celeb-photo" onerror="this.src='https://via.placeholder.com/150'">
+                            <img src="${celebPhoto}" class="celeb-photo" onerror="this.src='https://via.placeholder.com/150/667eea/ffffff?text=Photo'">
                             <div class="card-title">Thank you for your ${isGold ? 'VIP ' : ''}support!</div>
                             <div class="celeb-name">${celebName}</div>
                             <div style="margin-top:20px;font-size:14px;opacity:0.9;">You're part of something special ✨</div>
@@ -429,10 +406,7 @@
                 </div>
             `;
             
-            if (sheetUrl && fanId) {
-                loadChat();
-                setInterval(loadChat, 8000);
-            }
+            loadChat();
         } else {
             document.getElementById('content').innerHTML = `
                 <div style="text-align:center;padding:40px;">
@@ -443,7 +417,5 @@
         }
     };
 </script>
-```
-
 </body>
 </html>
