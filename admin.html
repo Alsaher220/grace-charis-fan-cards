@@ -73,7 +73,6 @@
         }
         .success { background: #d4edda; color: #155724; }
         .error { background: #f8d7da; color: #721c24; }
-        .info { background: #d1ecf1; color: #0c5460; }
         .user-list {
             max-height: 400px;
             overflow-y: auto;
@@ -165,29 +164,6 @@
             border-color: #FFD700;
             background: #fff9e6;
         }
-        .video-preview {
-            margin-top: 15px;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 8px;
-        }
-        .tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        .tab {
-            padding: 12px 24px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            color: #666;
-        }
-        .tab.active {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
         .chat-window {
             background: #f8f9fa;
             border-radius: 8px;
@@ -208,7 +184,7 @@
             margin-right: auto;
         }
         .chat-message.admin {
-            background: #fff3cd;
+            background: #e8eaf6;
             margin-left: auto;
             margin-right: 0;
         }
@@ -218,15 +194,22 @@
             margin-bottom: 5px;
             color: #666;
         }
-        .sheet-url-box {
-            background: #fff3cd;
-            border: 2px solid #ffc107;
-            border-radius: 8px;
-            padding: 15px;
+        .tabs {
+            display: flex;
+            gap: 10px;
             margin-bottom: 20px;
         }
-        .sheet-url-box strong {
-            color: #856404;
+        .tab {
+            padding: 12px 24px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            color: #666;
+        }
+        .tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
         }
     </style>
 </head>
@@ -254,17 +237,15 @@
                 <p style="font-size: 14px; opacity: 0.9;">Grace Charis Fan Card Manager</p>
             </div>
 
-
-
             <div class="tabs">
                 <div class="tab active" onclick="switchTab('fans')">👥 Fans</div>
                 <div class="tab" onclick="switchTab('chat')">💬 Chat</div>
-                <div class="tab" onclick="switchTab('video')">🎥 Video</div>
+                <div class="tab" onclick="switchTab('video')">🎥 Live Video</div>
             </div>
 
-            <div id="msg"></div>
-
+            <!-- FANS TAB -->
             <div id="fansTab">
+                <div id="msg"></div>
                 <div class="stats">
                     <div class="stat-card">
                         <div class="stat-number" id="total">0</div>
@@ -312,6 +293,7 @@
                 <button class="logout-btn" onclick="doLogout()">🚪 Logout</button>
             </div>
 
+            <!-- CHAT TAB -->
             <div id="chatTab" class="hidden">
                 <h2>💬 Fan Messages</h2>
                 <div class="input-group">
@@ -324,30 +306,31 @@
                 <div class="input-group">
                     <textarea id="adminMessage" placeholder="Type your message..."></textarea>
                 </div>
-                <button onclick="sendAdminMessage()">📤 Send Message to Fan</button>
+                <button onclick="sendAdminMessage()">📤 Send Message</button>
             </div>
 
+            <!-- VIDEO TAB -->
             <div id="videoTab" class="hidden">
-                <h2>🎥 Live Video Settings</h2>
+                <h2>🎥 "Live" Video Settings</h2>
                 <div class="input-group">
-                    <label>YouTube Video URL:</label>
-                    <input type="text" id="videoUrl" placeholder="Paste YouTube video URL here">
+                    <label>Video URL (YouTube, Vimeo, or direct MP4):</label>
+                    <input type="text" id="videoUrl" placeholder="https://www.youtube.com/embed/VIDEO_ID">
                     <small style="color: #666; display: block; margin-top: 5px;">
-                        Example: https://www.youtube.com/watch?v=VIDEO_ID
+                        For YouTube: Use embed URL (right-click video → Copy embed code → extract URL)
                     </small>
                 </div>
                 <div class="input-group">
                     <label>Video Title:</label>
                     <input type="text" id="videoTitle" placeholder="Grace's Live Session" value="🔴 LIVE: Grace's Exclusive Fan Update">
                 </div>
-                <button onclick="updateVideo()">💾 Update Video</button>
-                <div class="video-preview" id="videoPreview"></div>
+                <button onclick="saveVideo()">💾 Save Video Settings</button>
+                <div id="videoMsg"></div>
             </div>
         </div>
     </div>
+
     <script>
         const PWD = 'admin123';
-        let SHEET_URL = '';
         let db = {};
         let celeb = {
             name: 'Grace Charis',
@@ -356,26 +339,8 @@
             videoTitle: '🔴 LIVE: Grace\'s Exclusive Fan Update'
         };
         let selectedCardType = 'regular';
+        let chats = {};
         let currentChatFan = '';
-
-        function saveSheetUrl() {
-            const url = document.getElementById('sheetUrl').value.trim();
-            if (!url) {
-                msg('❌ Please enter a valid URL', 'error');
-                return;
-            }
-            SHEET_URL = url;
-            localStorage.setItem('sheetUrl', url);
-            msg('✅ Google Sheet URL saved!', 'success');
-        }
-
-        function loadSheetUrl() {
-            const saved = localStorage.getItem('sheetUrl');
-            if (saved) {
-                SHEET_URL = saved;
-                document.getElementById('sheetUrl').value = saved;
-            }
-        }
 
         function switchTab(tab) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -392,40 +357,6 @@
             } else if (tab === 'video') {
                 document.getElementById('videoUrl').value = celeb.video || '';
                 document.getElementById('videoTitle').value = celeb.videoTitle || '';
-                if (celeb.video) updateVideo();
-            }
-        }
-
-        function convertToEmbedUrl(url) {
-            if (!url) return '';
-            if (url.includes('youtube.com/watch')) {
-                const videoId = url.split('v=')[1]?.split('&')[0];
-                return videoId ? `https://www.youtube.com/embed/${videoId}` : '';
-            }
-            if (url.includes('youtu.be/')) {
-                const videoId = url.split('youtu.be/')[1]?.split('?')[0];
-                return videoId ? `https://www.youtube.com/embed/${videoId}` : '';
-            }
-            if (url.includes('youtube.com/embed/')) return url;
-            return url;
-        }
-
-        function updateVideo() {
-            const url = document.getElementById('videoUrl').value.trim();
-            const title = document.getElementById('videoTitle').value.trim();
-            
-            celeb.video = convertToEmbedUrl(url);
-            celeb.videoTitle = title;
-            save();
-            
-            if (celeb.video) {
-                document.getElementById('videoPreview').innerHTML = `
-                    <strong>Preview:</strong><br><br>
-                    <div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:8px;">
-                        <iframe src="${celeb.video}" frameborder="0" style="position:absolute;top:0;left:0;width:100%;height:100%;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                    </div>
-                    <p style="margin-top:10px;color:#28a745;font-weight:bold;">✅ Video ready!</p>
-                `;
             }
         }
 
@@ -442,16 +373,14 @@
                 const p = JSON.parse(d);
                 db = p.fans || {};
                 celeb = p.celeb || celeb;
+                chats = p.chats || {};
             }
             document.getElementById('cname').value = celeb.name;
             document.getElementById('cphoto').value = celeb.photo;
-            document.getElementById('videoUrl').value = celeb.video || '';
-            document.getElementById('videoTitle').value = celeb.videoTitle || '';
-            loadSheetUrl();
         }
 
         function save() {
-            localStorage.setItem('fanData', JSON.stringify({fans: db, celeb: celeb}));
+            localStorage.setItem('fanData', JSON.stringify({fans: db, celeb: celeb, chats: chats}));
         }
 
         function doLogin() {
@@ -492,6 +421,8 @@
                 date: new Date().toISOString(),
                 type: selectedCardType
             };
+            
+            chats[id] = [];
             save();
             
             const baseUrl = window.location.origin + window.location.pathname.replace('admin.html', 'index.html');
@@ -500,10 +431,7 @@
                 celeb: cn,
                 photo: cp,
                 type: selectedCardType,
-                video: celeb.video,
-                videoTitle: celeb.videoTitle,
-                fanId: id,
-                sheet: SHEET_URL
+                fanId: id
             });
             const link = baseUrl + '?' + params.toString();
             
@@ -514,6 +442,14 @@
             document.getElementById('fname').value = '';
             selectCardType('regular');
             refresh();
+        }
+
+        function saveVideo() {
+            celeb.video = document.getElementById('videoUrl').value.trim();
+            celeb.videoTitle = document.getElementById('videoTitle').value.trim();
+            save();
+            document.getElementById('videoMsg').innerHTML = '<div class="message success">✅ Video settings saved!</div>';
+            setTimeout(() => document.getElementById('videoMsg').innerHTML = '', 3000);
         }
 
         function updateChatFanList() {
@@ -531,20 +467,23 @@
             currentChatFan = document.getElementById('chatFanSelect').value;
             if (!currentChatFan) return;
             
-            const messages = JSON.parse(localStorage.getItem('chat_' + currentChatFan) || '[]');
+            const messages = chats[currentChatFan] || [];
+            const chatWindow = document.getElementById('chatWindow');
             
-            if (messages.length > 0) {
-                document.getElementById('chatWindow').innerHTML = messages.map(m => `
-                    <div class="chat-message ${m.from}">
-                        <div class="chat-sender">${m.from === 'fan' ? db[currentChatFan].name : 'Grace Charis'}</div>
-                        <div>${m.message}</div>
-                        <div style="font-size:11px;color:#999;margin-top:5px">${new Date(m.time).toLocaleString()}</div>
-                    </div>
-                `).join('');
-                document.getElementById('chatWindow').scrollTop = 999999;
-            } else {
-                document.getElementById('chatWindow').innerHTML = '<p style="text-align:center;color:#666;padding:20px">No messages yet</p>';
+            if (messages.length === 0) {
+                chatWindow.innerHTML = '<p style="text-align:center;color:#666;padding:20px">No messages yet</p>';
+                return;
             }
+            
+            chatWindow.innerHTML = messages.map(m => `
+                <div class="chat-message ${m.from}">
+                    <div class="chat-sender">${m.from === 'fan' ? db[currentChatFan].name : 'Grace Charis'}</div>
+                    <div>${m.text}</div>
+                    <div style="font-size:11px;color:#999;margin-top:5px">${new Date(m.time).toLocaleString()}</div>
+                </div>
+            `).join('');
+            
+            chatWindow.scrollTop = chatWindow.scrollHeight;
         }
 
         function sendAdminMessage() {
@@ -556,15 +495,14 @@
             const text = document.getElementById('adminMessage').value.trim();
             if (!text) return;
             
-            const messages = JSON.parse(localStorage.getItem('chat_' + currentChatFan) || '[]');
-            messages.push({
+            if (!chats[currentChatFan]) chats[currentChatFan] = [];
+            chats[currentChatFan].push({
                 from: 'admin',
-                message: text,
+                text: text,
                 time: new Date().toISOString()
             });
-            localStorage.setItem('chat_' + currentChatFan, JSON.stringify(messages));
             
-            msg('✅ Message sent!', 'success');
+            save();
             document.getElementById('adminMessage').value = '';
             loadChat();
         }
@@ -597,8 +535,6 @@
                         celeb: cn,
                         photo: cp,
                         type: f.type || 'regular',
-                        video: celeb.video,
-                        videoTitle: celeb.videoTitle,
                         fanId: i
                     });
                     const link = baseUrl + '?' + params.toString();
@@ -614,18 +550,11 @@
                             <div class="user-actions">
                                 <button class="view-btn" onclick="window.open('${link}','_blank')">👁️ View</button>
                                 <button class="copy-btn" onclick="copy('${link}',event)">📋 Copy</button>
-                                <button class="chat-btn" onclick="openChatForFan('${i}')">💬 Chat</button>
                                 <button class="delete-btn" onclick="del('${i}')">🗑️ Delete</button>
                             </div>
                         </div>
                     `;
                 }).join('');
-        }
-
-        function openChatForFan(fanId) {
-            switchTab('chat');
-            document.getElementById('chatFanSelect').value = fanId;
-            loadChat();
         }
 
         function copy(link, e) {
@@ -644,6 +573,7 @@
         function del(id) {
             if (confirm('Delete ' + db[id].name + '?')) {
                 delete db[id];
+                delete chats[id];
                 save();
                 refresh();
             }
