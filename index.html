@@ -253,155 +253,148 @@
         <source src="https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3" type="audio/mpeg">
     </audio>
 
-```
-<script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
-    import { getDatabase, ref, push, onValue } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js';
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+        import { getDatabase, ref, push, onValue } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js';
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyD5Z_YbfJs1LTZVqq8IDLUWakGmj5b96UE",
-        authDomain: "grace-fan-cards.firebaseapp.com",
-        databaseURL: "https://grace-fan-cards-default-rtdb.firebaseio.com",
-        projectId: "grace-fan-cards",
-        storageBucket: "grace-fan-cards.firebasestorage.app",
-        messagingSenderId: "982523155231",
-        appId: "1:982523155231:web:472627226297f11ebb162a"
-    };
+        const firebaseConfig = {
+            apiKey: "AIzaSyD5Z_YbfJs1LTZVqq8IDLUWakGmj5b96UE",
+            authDomain: "grace-fan-cards.firebaseapp.com",
+            databaseURL: "https://grace-fan-cards-default-rtdb.firebaseio.com",
+            projectId: "grace-fan-cards",
+            storageBucket: "grace-fan-cards.firebasestorage.app",
+            messagingSenderId: "982523155231",
+            appId: "1:982523155231:web:472627226297f11ebb162a"
+        };
 
-    const app = initializeApp(firebaseConfig);
-    const database = getDatabase(app);
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
 
-    let musicPlaying = false;
-    const audio = document.getElementById('bgMusic');
-    let fanId = '';
+        let musicPlaying = false;
+        const audio = document.getElementById('bgMusic');
+        let fanId = '';
 
-    window.toggleMusic = function() {
-        if (musicPlaying) {
-            audio.pause();
-            event.target.textContent = '🔇 Play Music';
-            musicPlaying = false;
-        } else {
-            audio.play();
-            event.target.textContent = '🔊 Pause Music';
-            musicPlaying = true;
-        }
-    };
+        window.toggleMusic = function() {
+            if (musicPlaying) {
+                audio.pause();
+                event.target.textContent = '🔇 Play Music';
+                musicPlaying = false;
+            } else {
+                audio.play();
+                event.target.textContent = '🔊 Pause Music';
+                musicPlaying = true;
+            }
+        };
 
-    window.sendFanMessage = function() {
-        const input = document.getElementById('fanChatInput');
-        const text = input.value.trim();
-        if (!text || !fanId) return;
-        
-        const chatRef = ref(database, 'chats/' + fanId);
-        push(chatRef, {
-            from: 'fan',
-            text: text,
-            time: new Date().toISOString()
-        });
-        
-        input.value = '';
-    };
-
-    function displayChat() {
-        if (!fanId) return;
-        
-        const chatRef = ref(database, 'chats/' + fanId);
-        onValue(chatRef, (snapshot) => {
-            const messages = [];
-            snapshot.forEach((child) => {
-                messages.push(child.val());
+        window.sendFanMessage = function() {
+            const input = document.getElementById('fanChatInput');
+            const text = input.value.trim();
+            if (!text || !fanId) return;
+            
+            const chatRef = ref(database, 'chats/' + fanId);
+            push(chatRef, {
+                from: 'fan',
+                text: text,
+                time: new Date().toISOString()
             });
             
-            const container = document.getElementById('chatMessages');
-            if (messages.length === 0) {
-                container.innerHTML = '<p style="text-align:center;color:#666;padding:20px">No messages yet. Say hi to Grace!</p>';
-                return;
-            }
-            
-            container.innerHTML = messages.map(m => `
-                <div class="chat-msg ${m.from}">
-                    <div style="font-weight:bold;font-size:12px;margin-bottom:5px;color:#666">
-                        ${m.from === 'fan' ? 'You' : 'Grace Charis'}
-                    </div>
-                    <div>${m.text}</div>
-                    <div style="font-size:11px;color:#999;margin-top:5px">${new Date(m.time).toLocaleString()}</div>
-                </div>
-            `).join('');
-            
-            container.scrollTop = container.scrollHeight;
-        });
-    }
+            input.value = '';
+        };
 
-    window.copyLink = function() {
-        navigator.clipboard.writeText(window.location.href);
-        event.target.textContent = '✅ Link Copied!';
-        const isGold = document.body.classList.contains('gold-theme');
-        event.target.style.background = isGold ? '#FF8C00' : '#218838';
-        setTimeout(() => {
-            event.target.textContent = '📋 Copy & Save This Link';
-            event.target.style.background = '';
-        }, 3000);
-    };
-
-    window.onload = function() {
-        const params = new URLSearchParams(window.location.search);
-        const fanName = params.get('name');
-        const celebName = params.get('celeb');
-        const celebPhoto = params.get('photo');
-        const cardType = params.get('type') || 'regular';
-        fanId = params.get('fanId') || '';
-        
-        if (fanName && celebName) {
-            const data = localStorage.getItem('fanData');
-            let videoUrl = '';
-            let videoTitle = '🔴 LIVE: Grace\'s Exclusive Fan Update';
+        function displayChat() {
+            if (!fanId) return;
             
-            if (data) {
-                const parsed = JSON.parse(data);
-                videoUrl = parsed.celeb?.video || '';
-                videoTitle = parsed.celeb?.videoTitle || videoTitle;
-            }
-            
-            const videoRef = ref(database, 'videoSettings');
-            const videoRef = ref(database, 'videoSettings');
-            onValue(videoRef, (snapshot) => {
-                const videoData = snapshot.val();
-                const hasWatched = localStorage.getItem('watched_' + fanId);
+            const chatRef = ref(database, 'chats/' + fanId);
+            onValue(chatRef, (snapshot) => {
+                const messages = [];
+                snapshot.forEach((child) => {
+                    messages.push(child.val());
+                });
                 
-                if (videoData) {
-                    const newVideoUrl = videoData.url || '';
-                    const newVideoTitle = videoData.title || videoTitle;
+                const container = document.getElementById('chatMessages');
+                if (messages.length === 0) {
+                    container.innerHTML = '<p style="text-align:center;color:#666;padding:20px">No messages yet. Say hi to Grace!</p>';
+                    return;
+                }
+                
+                container.innerHTML = messages.map(m => `
+                    <div class="chat-msg ${m.from}">
+                        <div style="font-weight:bold;font-size:12px;margin-bottom:5px;color:#666">
+                            ${m.from === 'fan' ? 'You' : 'Grace Charis'}
+                        </div>
+                        <div>${m.text}</div>
+                        <div style="font-size:11px;color:#999;margin-top:5px">${new Date(m.time).toLocaleString()}</div>
+                    </div>
+                `).join('');
+                
+                container.scrollTop = container.scrollHeight;
+            });
+        }
+
+        window.copyLink = function() {
+            navigator.clipboard.writeText(window.location.href);
+            event.target.textContent = '✅ Link Copied!';
+            const isGold = document.body.classList.contains('gold-theme');
+            event.target.style.background = isGold ? '#FF8C00' : '#218838';
+            setTimeout(() => {
+                event.target.textContent = '📋 Copy & Save This Link';
+                event.target.style.background = '';
+            }, 3000);
+        };
+
+        window.onload = function() {
+            const params = new URLSearchParams(window.location.search);
+            const fanName = params.get('name');
+            const celebName = params.get('celeb');
+            const celebPhoto = params.get('photo');
+            const cardType = params.get('type') || 'regular';
+            fanId = params.get('fanId') || '';
+            
+            if (fanName && celebName) {
+                const data = localStorage.getItem('fanData');
+                let videoUrl = '';
+                let videoTitle = '🔴 LIVE: Grace\'s Exclusive Fan Update';
+                
+                if (data) {
+                    const parsed = JSON.parse(data);
+                    videoUrl = parsed.celeb?.video || '';
+                    videoTitle = parsed.celeb?.videoTitle || videoTitle;
+                }
+                
+                const videoRef = ref(database, 'videoSettings');
+                onValue(videoRef, (snapshot) => {
+                    const videoData = snapshot.val();
+                    const hasWatched = localStorage.getItem('watched_' + fanId);
                     
-                    if (newVideoUrl && document.getElementById('videoSection')) {
-                        if (!hasWatched) {
-                            // Show video - first time viewing
+                    if (videoData && !hasWatched) {
+                        videoUrl = videoData.url || videoUrl;
+                        videoTitle = videoData.title || videoTitle;
+                        
+                        if (videoUrl && document.getElementById('videoSection')) {
                             document.getElementById('videoSection').innerHTML = `
-                                <div class="video-section">
-                                    <div class="live-badge">
-                                        <div class="live-dot"></div>
-                                        ${newVideoTitle}
-                                    </div>
-                                    <iframe id="videoPlayer" width="100%" height="280" src="${newVideoUrl}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="border-radius:10px"></iframe>
+                                <div class="live-badge">
+                                    <div class="live-dot"></div>
+                                    ${videoTitle}
                                 </div>
+                                <iframe id="videoPlayer" width="100%" height="280" src="${videoUrl}?autoplay=1&controls=0&modestbranding=1&rel=0&showinfo=0" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="border-radius:10px"></iframe>
                             `;
                             
-                            // Mark as watched after 30 seconds
+                            // CHANGED: 30 seconds instead of 5
                             setTimeout(() => {
                                 localStorage.setItem('watched_' + fanId, 'true');
-                                if (document.getElementById('videoSection')) {
-                                    document.getElementById('videoSection').innerHTML = `
-                                        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 15px; text-align: center; color: white; margin: 25px 0;">
-                                            <div style="font-size: 48px; margin-bottom: 15px;">✨</div>
-                                            <h3 style="font-size: 20px; margin-bottom: 10px;">Thanks for watching!</h3>
-                                            <p style="opacity: 0.9;">This live stream has ended.</p>
-                                        </div>
-                                    `;
-                                }
+                                document.getElementById('videoSection').innerHTML = `
+                                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 15px; text-align: center; color: white;">
+                                        <div style="font-size: 48px; margin-bottom: 15px;">✨</div>
+                                        <h3 style="font-size: 20px; margin-bottom: 10px;">Thanks for watching!</h3>
+                                        <p style="opacity: 0.9;">This live stream has ended.</p>
+                                    </div>
+                                `;
                             }, 30000);
-                        } else {
-                            // Already watched - show ended message
+                        }
+                    } else if (videoData && hasWatched) {
+                        if (document.getElementById('videoSection')) {
                             document.getElementById('videoSection').innerHTML = `
-                                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 15px; text-align: center; color: white; margin: 25px 0;">
+                                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 15px; text-align: center; color: white;">
                                     <div style="font-size: 48px; margin-bottom: 15px;">✨</div>
                                     <h3 style="font-size: 20px; margin-bottom: 10px;">Thanks for watching!</h3>
                                     <p style="opacity: 0.9;">This live stream has ended.</p>
@@ -409,83 +402,115 @@
                             `;
                         }
                     }
-                }
-            });
-            
-            const isGold = cardType === 'gold';
-            if (isGold) document.body.classList.add('gold-theme');
+                });
+                
+                const isGold = cardType === 'gold';
+                if (isGold) document.body.classList.add('gold-theme');
 
-            const photo = celebPhoto || 'https://via.placeholder.com/150/667eea/ffffff?text=Photo';
-            const goldBadge = isGold ? '<div class="vip-badge">👑 GOLD VIP MEMBER 👑</div>' : '';
-            
-            let videoSection = '<div class="video-section" id="videoSection"></div>';
-            
-            document.getElementById('content').innerHTML = `
-                ${goldBadge}
-                <div class="welcome">✨ Your Exclusive Fan Card ✨</div>
+                const photo = celebPhoto || 'https://via.placeholder.com/150/667eea/ffffff?text=Photo';
+                const goldBadge = isGold ? '<div class="vip-badge">👑 GOLD VIP MEMBER 👑</div>' : '';
                 
-                ${videoSection}
+                const hasWatched = localStorage.getItem('watched_' + fanId);
                 
-                <div class="card-wrapper">
-                    <div class="fan-card">
-                        <div class="card-face card-front">
-                            <img src="${photo}" class="celeb-photo" onerror="this.src='https://via.placeholder.com/150/667eea/ffffff?text=Photo'">
-                            <div class="fan-name">${fanName}</div>
-                            <div class="card-title">${isGold ? 'Gold VIP Fan' : 'Official Fan'}</div>
-                            <div class="celeb-name">${celebName}</div>
-                            ${isGold ? '<div style="margin-top:10px;font-size:16px;">👑</div>' : ''}
+                let videoSection = '';
+                if (videoUrl && !hasWatched) {
+                    videoSection = `
+                        <div class="video-section" id="videoSection">
+                            <div class="live-badge">
+                                <div class="live-dot"></div>
+                                ${videoTitle}
+                            </div>
+                            <iframe id="videoPlayer" width="100%" height="280" src="${videoUrl}?autoplay=1&controls=0&modestbranding=1&rel=0&showinfo=0" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="border-radius:10px"></iframe>
                         </div>
-                        <div class="card-face card-back">
-                            <img src="${photo}" class="celeb-photo" onerror="this.src='https://via.placeholder.com/150/667eea/ffffff?text=Photo'">
-                            <div class="card-title">Thank you for your ${isGold ? 'VIP ' : ''}support!</div>
-                            <div class="celeb-name">${celebName}</div>
-                            <div style="margin-top:20px;font-size:14px;opacity:0.9">
-                                You're part of something special ✨
+                    `;
+                } else if (videoUrl && hasWatched) {
+                    videoSection = `
+                        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 15px; text-align: center; color: white; margin: 25px 0;">
+                            <div style="font-size: 48px; margin-bottom: 15px;">✨</div>
+                            <h3 style="font-size: 20px; margin-bottom: 10px;">Thanks for watching!</h3>
+                            <p style="opacity: 0.9;">This live stream has ended.</p>
+                        </div>
+                    `;
+                } else {
+                    videoSection = '<div class="video-section" id="videoSection"></div>';
+                }
+                
+                document.getElementById('content').innerHTML = `
+                    ${goldBadge}
+                    <div class="welcome">✨ Your Exclusive Fan Card ✨</div>
+                    
+                    ${videoSection}
+                    
+                    <div class="card-wrapper">
+                        <div class="fan-card">
+                            <div class="card-face card-front">
+                                <img src="${photo}" class="celeb-photo" onerror="this.src='https://via.placeholder.com/150/667eea/ffffff?text=Photo'">
+                                <div class="fan-name">${fanName}</div>
+                                <div class="card-title">${isGold ? 'Gold VIP Fan' : 'Official Fan'}</div>
+                                <div class="celeb-name">${celebName}</div>
+                                ${isGold ? '<div style="margin-top:10px;font-size:16px;">👑</div>' : ''}
+                            </div>
+                            <div class="card-face card-back">
+                                <img src="${photo}" class="celeb-photo" onerror="this.src='https://via.placeholder.com/150/667eea/ffffff?text=Photo'">
+                                <div class="card-title">Thank you for your ${isGold ? 'VIP ' : ''}support!</div>
+                                <div class="celeb-name">${celebName}</div>
+                                <div style="margin-top:20px;font-size:14px;opacity:0.9">
+                                    You're part of something special ✨
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                
-                <div class="music-control">
-                    <button class="music-btn" onclick="toggleMusic()">🔊 Play Music</button>
-                </div>
-                
-                <div class="chat-container">
-                    <div class="chat-title">💬 Chat with Grace</div>
-                    <div class="chat-messages" id="chatMessages"></div>
-                    <div class="chat-input-box">
-                        <input type="text" id="fanChatInput" placeholder="Type your message..." onkeypress="if(event.key==='Enter') sendFanMessage()">
-                        <button onclick="sendFanMessage()">📤 Send</button>
+                    
+                    <div class="music-control">
+                        <button class="music-btn" onclick="toggleMusic()">🔊 Play Music</button>
                     </div>
-                </div>
+                    
+                    <div class="chat-container">
+                        <div class="chat-title">💬 Chat with Grace</div>
+                        <div class="chat-messages" id="chatMessages"></div>
+                        <div class="chat-input-box">
+                            <input type="text" id="fanChatInput" placeholder="Type your message..." onkeypress="if(event.key==='Enter') sendFanMessage()">
+                            <button onclick="sendFanMessage()">📤 Send</button>
+                        </div>
+                    </div>
+                    
+                    <div class="link-box">
+                        <strong style="display:block;margin-bottom:8px;color:#333">📌 Your Personal Link:</strong>
+                        <div class="link-display">${window.location.href}</div>
+                        <button onclick="copyLink()">📋 Copy & Save This Link</button>
+                        <p style="margin-top:12px;font-size:13px;color:#666;text-align:center">
+                            Bookmark this link to view your card anytime!
+                        </p>
+                    </div>
+                `;
                 
-                <div class="link-box">
-                    <strong style="display:block;margin-bottom:8px;color:#333">📌 Your Personal Link:</strong>
-                    <div class="link-display">${window.location.href}</div>
-                    <button onclick="copyLink()">📋 Copy & Save This Link</button>
-                    <p style="margin-top:12px;font-size:13px;color:#666;text-align:center">
-                        Bookmark this link to view your card anytime!
-                    </p>
-                </div>
-            `;
-            
-            displayChat();
-            
-        } else {
-            document.getElementById('content').innerHTML = `
-                <div style="text-align:center;padding:40px">
-                    <h1 style="color:#667eea;margin-bottom:20px;font-size:32px">🌟 Grace Charis Fan Cards</h1>
-                    <p style="font-size:16px;color:#666;line-height:1.8">
-                        Welcome! This is the Grace Charis official fan card system.
-                        <br><br>
-                        If you received a personalized fan card link, please use that link to view your exclusive digital fan card.
-                        <br><br>
-                        <span style="color:#999;font-size:14px">Don't have a fan card yet? Contact your administrator!</span>
-                    </p>
-                </div>
-            `;
-        }
-    };
-</script>
+                displayChat();
+                
+                // CHANGED: 30 seconds instead of 5
+                if (videoUrl && !localStorage.getItem('watched_' + fanId)) {
+                    const videoPlayer = document.getElementById('videoPlayer');
+                    if (videoPlayer) {
+                        setTimeout(() => {
+                            localStorage.setItem('watched_' + fanId, 'true');
+                        }, 30000);
+                    }
+                }
+                
+            } else {
+                document.getElementById('content').innerHTML = `
+                    <div style="text-align:center;padding:40px">
+                        <h1 style="color:#667eea;margin-bottom:20px;font-size:32px">🌟 Grace Charis Fan Cards</h1>
+                        <p style="font-size:16px;color:#666;line-height:1.8">
+                            Welcome! This is the Grace Charis official fan card system.
+                            <br><br>
+                            If you received a personalized fan card link, please use that link to view your exclusive digital fan card.
+                            <br><br>
+                            <span style="color:#999;font-size:14px">Don't have a fan card yet? Contact your administrator!</span>
+                        </p>
+                    </div>
+                `;
+            }
+        };
+    </script>
 </body>
 </html>
