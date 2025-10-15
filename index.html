@@ -363,44 +363,51 @@
             }
             
             const videoRef = ref(database, 'videoSettings');
+            const videoRef = ref(database, 'videoSettings');
             onValue(videoRef, (snapshot) => {
                 const videoData = snapshot.val();
                 const hasWatched = localStorage.getItem('watched_' + fanId);
                 
-                if (videoData && !hasWatched) {
-                    videoUrl = videoData.url || videoUrl;
-                    videoTitle = videoData.title || videoTitle;
+                if (videoData) {
+                    const newVideoUrl = videoData.url || '';
+                    const newVideoTitle = videoData.title || videoTitle;
                     
-                    if (videoUrl && document.getElementById('videoSection')) {
-                        document.getElementById('videoSection').innerHTML = `
-                            <div class="live-badge">
-                                <div class="live-dot"></div>
-                                ${videoTitle}
-                            </div>
-                            <iframe id="videoPlayer" width="100%" height="280" src="${videoUrl}?autoplay=1&controls=0&modestbranding=1&rel=0&showinfo=0" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="border-radius:10px"></iframe>
-                        `;
-                        
-                        // Mark as watched after 5 seconds
-                        setTimeout(() => {
-                            localStorage.setItem('watched_' + fanId, 'true');
+                    if (newVideoUrl && document.getElementById('videoSection')) {
+                        if (!hasWatched) {
+                            // Show video - first time viewing
                             document.getElementById('videoSection').innerHTML = `
-                                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 15px; text-align: center; color: white;">
+                                <div class="video-section">
+                                    <div class="live-badge">
+                                        <div class="live-dot"></div>
+                                        ${newVideoTitle}
+                                    </div>
+                                    <iframe id="videoPlayer" width="100%" height="280" src="${newVideoUrl}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="border-radius:10px"></iframe>
+                                </div>
+                            `;
+                            
+                            // Mark as watched after 30 seconds
+                            setTimeout(() => {
+                                localStorage.setItem('watched_' + fanId, 'true');
+                                if (document.getElementById('videoSection')) {
+                                    document.getElementById('videoSection').innerHTML = `
+                                        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 15px; text-align: center; color: white; margin: 25px 0;">
+                                            <div style="font-size: 48px; margin-bottom: 15px;">✨</div>
+                                            <h3 style="font-size: 20px; margin-bottom: 10px;">Thanks for watching!</h3>
+                                            <p style="opacity: 0.9;">This live stream has ended.</p>
+                                        </div>
+                                    `;
+                                }
+                            }, 30000);
+                        } else {
+                            // Already watched - show ended message
+                            document.getElementById('videoSection').innerHTML = `
+                                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 15px; text-align: center; color: white; margin: 25px 0;">
                                     <div style="font-size: 48px; margin-bottom: 15px;">✨</div>
                                     <h3 style="font-size: 20px; margin-bottom: 10px;">Thanks for watching!</h3>
                                     <p style="opacity: 0.9;">This live stream has ended.</p>
                                 </div>
                             `;
-                        }, 5000);
-                    }
-                } else if (videoData && hasWatched) {
-                    if (document.getElementById('videoSection')) {
-                        document.getElementById('videoSection').innerHTML = `
-                            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 15px; text-align: center; color: white;">
-                                <div style="font-size: 48px; margin-bottom: 15px;">✨</div>
-                                <h3 style="font-size: 20px; margin-bottom: 10px;">Thanks for watching!</h3>
-                                <p style="opacity: 0.9;">This live stream has ended.</p>
-                            </div>
-                        `;
+                        }
                     }
                 }
             });
@@ -411,30 +418,7 @@
             const photo = celebPhoto || 'https://via.placeholder.com/150/667eea/ffffff?text=Photo';
             const goldBadge = isGold ? '<div class="vip-badge">👑 GOLD VIP MEMBER 👑</div>' : '';
             
-            const hasWatched = localStorage.getItem('watched_' + fanId);
-            
-            let videoSection = '';
-            if (videoUrl && !hasWatched) {
-                videoSection = `
-                    <div class="video-section" id="videoSection">
-                        <div class="live-badge">
-                            <div class="live-dot"></div>
-                            ${videoTitle}
-                        </div>
-                        <iframe id="videoPlayer" width="100%" height="280" src="${videoUrl}?autoplay=1&controls=0&modestbranding=1&rel=0&showinfo=0" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="border-radius:10px"></iframe>
-                    </div>
-                `;
-            } else if (videoUrl && hasWatched) {
-                videoSection = `
-                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 15px; text-align: center; color: white; margin: 25px 0;">
-                        <div style="font-size: 48px; margin-bottom: 15px;">✨</div>
-                        <h3 style="font-size: 20px; margin-bottom: 10px;">Thanks for watching!</h3>
-                        <p style="opacity: 0.9;">This live stream has ended.</p>
-                    </div>
-                `;
-            } else {
-                videoSection = '<div class="video-section" id="videoSection"></div>';
-            }
+            let videoSection = '<div class="video-section" id="videoSection"></div>';
             
             document.getElementById('content').innerHTML = `
                 ${goldBadge}
@@ -486,17 +470,6 @@
             `;
             
             displayChat();
-            
-            // Mark video as watched after it plays
-            if (videoUrl && !localStorage.getItem('watched_' + fanId)) {
-                const videoPlayer = document.getElementById('videoPlayer');
-                if (videoPlayer) {
-                    // Mark as watched after 5 seconds (they've seen it)
-                    setTimeout(() => {
-                        localStorage.setItem('watched_' + fanId, 'true');
-                    }, 5000);
-                }
-            }
             
         } else {
             document.getElementById('content').innerHTML = `
