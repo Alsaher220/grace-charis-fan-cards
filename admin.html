@@ -1,9 +1,10 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel</title>
+    <title>Admin Panel - Fixed</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -216,6 +217,12 @@
             background: #f8f9fa;
             border-radius: 10px;
         }
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #667eea;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -228,7 +235,7 @@
             <div id="loginMsg"></div>
             <div class="input-group">
                 <label>Enter Admin Password:</label>
-                <input type="password" id="pwd" placeholder="Enter password">
+                <input type="password" id="pwd" placeholder="Enter password" onkeypress="if(event.key==='Enter') doLogin()">
             </div>
             <button onclick="doLogin()">🔓 Login</button>
             <p style="text-align: center; color: #999; font-size: 13px; margin-top: 15px;">
@@ -236,419 +243,431 @@
             </p>
         </div>
 
-```
-    <div class="section hidden" id="adminSection">
-        <div class="header">
-            <h1>🔐 Admin Panel</h1>
-            <p style="font-size: 14px; opacity: 0.9;">Grace Charis Fan Card Manager</p>
-        </div>
-
-        <div class="tabs">
-            <div class="tab active" onclick="switchTab('fans')">👥 Fans</div>
-            <div class="tab" onclick="switchTab('chat')">💬 Chat</div>
-            <div class="tab" onclick="switchTab('video')">🎥 Live Video</div>
-        </div>
-
-        <div id="fansTab">
-            <div id="msg"></div>
-            <div class="stats">
-                <div class="stat-card">
-                    <div class="stat-number" id="total">0</div>
-                    <div style="font-size: 12px; color: #666; margin-top: 5px;">Total Fans</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="goldCount">0</div>
-                    <div style="font-size: 12px; color: #666; margin-top: 5px;">Gold VIPs</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="today">0</div>
-                    <div style="font-size: 12px; color: #666; margin-top: 5px;">Today</div>
-                </div>
+        <div class="section hidden" id="adminSection">
+            <div class="header">
+                <h1>🔐 Admin Panel</h1>
+                <p style="font-size: 14px; opacity: 0.9;">Grace Charis Fan Card Manager</p>
             </div>
 
-            <div class="input-group">
-                <label>Celebrity Name:</label>
-                <input type="text" id="cname" value="Grace Charis">
-            </div>
-            <div class="input-group">
-                <label>Celebrity Photo URL:</label>
-                <input type="text" id="cphoto" value="https://cdn.i-scmp.com/sites/default/files/styles/768x768/public/d8/images/canvas/2025/04/23/e7b3bcfa-41b4-40ac-bff9-a46437a13cd7_8140c932.jpg?itok=a5KQpa_I&v=1745377355">
+            <div class="tabs">
+                <div class="tab active" onclick="switchTab('fans')">👥 Fans</div>
+                <div class="tab" onclick="switchTab('chat')">💬 Chat</div>
+                <div class="tab" onclick="switchTab('video')">🎥 Live Video</div>
             </div>
 
-            <div class="input-group">
-                <label>Card Type:</label>
-                <div class="card-type-selector">
-                    <div class="card-type-btn active" id="regularBtn" onclick="selectCardType('regular')">
-                        <div style="font-size: 24px;">💜</div>
-                        <div style="font-weight: bold; margin-top: 5px;">Regular</div>
+            <div id="fansTab">
+                <div id="msg"></div>
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="stat-number" id="total">0</div>
+                        <div style="font-size: 12px; color: #666; margin-top: 5px;">Total Fans</div>
                     </div>
-                    <div class="card-type-btn gold" id="goldBtn" onclick="selectCardType('gold')">
-                        <div style="font-size: 24px;">👑</div>
-                        <div style="font-weight: bold; margin-top: 5px;">Gold VIP</div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="goldCount">0</div>
+                        <div style="font-size: 12px; color: #666; margin-top: 5px;">Gold VIPs</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="today">0</div>
+                        <div style="font-size: 12px; color: #666; margin-top: 5px;">Today</div>
                     </div>
                 </div>
+
+                <div class="input-group">
+                    <label>Celebrity Name:</label>
+                    <input type="text" id="cname" value="Grace Charis">
+                </div>
+                <div class="input-group">
+                    <label>Celebrity Photo URL:</label>
+                    <input type="text" id="cphoto" value="https://cdn.i-scmp.com/sites/default/files/styles/768x768/public/d8/images/canvas/2025/04/23/e7b3bcfa-41b4-40ac-bff9-a46437a13cd7_8140c932.jpg?itok=a5KQpa_I&v=1745377355">
+                </div>
+
+                <div class="input-group">
+                    <label>Card Type:</label>
+                    <div class="card-type-selector">
+                        <div class="card-type-btn active" id="regularBtn" onclick="selectCardType('regular')">
+                            <div style="font-size: 24px;">💜</div>
+                            <div style="font-weight: bold; margin-top: 5px;">Regular</div>
+                        </div>
+                        <div class="card-type-btn gold" id="goldBtn" onclick="selectCardType('gold')">
+                            <div style="font-size: 24px;">👑</div>
+                            <div style="font-weight: bold; margin-top: 5px;">Gold VIP</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>Fan Name:</label>
+                    <input type="text" id="fname" placeholder="Enter fan name" onkeypress="if(event.key==='Enter') addFan()">
+                </div>
+                <button onclick="addFan()">➕ Register Fan & Generate Link</button>
+                <div class="user-list" id="list">
+                    <div class="loading">⏳ Loading fans...</div>
+                </div>
+                <button class="logout-btn" onclick="doLogout()">🚪 Logout</button>
             </div>
 
-            <div class="input-group">
-                <label>Fan Name:</label>
-                <input type="text" id="fname" placeholder="Enter fan name">
+            <div id="chatTab" class="hidden">
+                <h2>💬 Fan Messages</h2>
+                <div class="input-group">
+                    <label>Select Fan:</label>
+                    <select id="chatFanSelect" onchange="loadChat()">
+                        <option value="">-- Select a fan --</option>
+                    </select>
+                </div>
+                <div class="chat-window" id="chatWindow"></div>
+                <div class="input-group">
+                    <textarea id="adminMessage" placeholder="Type your message..."></textarea>
+                </div>
+                <button onclick="sendAdminMessage()">📤 Send Message</button>
             </div>
-            <button onclick="addFan()">➕ Register Fan & Generate Link</button>
-            <div class="user-list" id="list"></div>
-            <button class="logout-btn" onclick="doLogout()">🚪 Logout</button>
-        </div>
 
-        <div id="chatTab" class="hidden">
-            <h2>💬 Fan Messages</h2>
-            <div class="input-group">
-                <label>Select Fan:</label>
-                <select id="chatFanSelect" onchange="loadChat()">
-                    <option value="">-- Select a fan --</option>
-                </select>
+            <div id="videoTab" class="hidden">
+                <h2>🎥 Live Video Settings</h2>
+                <div class="input-group">
+                    <label>YouTube Video URL:</label>
+                    <input type="text" id="videoUrl" placeholder="https://www.youtube.com/watch?v=VIDEO_ID">
+                    <small style="color: #666; display: block; margin-top: 5px;">
+                        Paste any YouTube link - auto-converts to embed format
+                    </small>
+                </div>
+                <div class="input-group">
+                    <label>Video Title:</label>
+                    <input type="text" id="videoTitle" value="🔴 LIVE: Grace's Exclusive Fan Update">
+                </div>
+                <button onclick="saveVideo()">💾 Save Video Settings</button>
+                <div id="videoMsg"></div>
+                <div class="video-preview" id="videoPreview"></div>
             </div>
-            <div class="chat-window" id="chatWindow"></div>
-            <div class="input-group">
-                <textarea id="adminMessage" placeholder="Type your message..."></textarea>
-            </div>
-            <button onclick="sendAdminMessage()">📤 Send Message</button>
-        </div>
-
-        <div id="videoTab" class="hidden">
-            <h2>🎥 Live Video Settings</h2>
-            <div class="input-group">
-                <label>YouTube Video URL:</label>
-                <input type="text" id="videoUrl" placeholder="https://www.youtube.com/watch?v=VIDEO_ID">
-                <small style="color: #666; display: block; margin-top: 5px;">
-                    Paste any YouTube link - auto-converts to embed format
-                </small>
-            </div>
-            <div class="input-group">
-                <label>Video Title:</label>
-                <input type="text" id="videoTitle" value="🔴 LIVE: Grace's Exclusive Fan Update">
-            </div>
-            <button onclick="saveVideo()">💾 Save Video Settings</button>
-            <div id="videoMsg"></div>
-            <div class="video-preview" id="videoPreview"></div>
         </div>
     </div>
-</div>
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+        import { getDatabase, ref, push, onValue, set, remove, update } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js';
 
-<script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
-    import { getDatabase, ref, push, onValue, set } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js';
-
-    const firebaseConfig = {
-        apiKey: "AIzaSyD5Z_YbfJs1LTZVqq8IDLUWakGmj5b96UE",
-        authDomain: "grace-fan-cards.firebaseapp.com",
-        databaseURL: "https://grace-fan-cards-default-rtdb.firebaseio.com",
-        projectId: "grace-fan-cards",
-        storageBucket: "grace-fan-cards.firebasestorage.app",
-        messagingSenderId: "982523155231",
-        appId: "1:982523155231:web:472627226297f11ebb162a"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const database = getDatabase(app);
-
-    const PWD = 'admin123';
-    let db = {};
-    let celeb = {
-        name: 'Grace Charis',
-        photo: 'https://cdn.i-scmp.com/sites/default/files/styles/768x768/public/d8/images/canvas/2025/04/23/e7b3bcfa-41b4-40ac-bff9-a46437a13cd7_8140c932.jpg?itok=a5KQpa_I&v=1745377355',
-        video: '',
-        videoTitle: '🔴 LIVE: Grace\'s Exclusive Fan Update'
-    };
-    let selectedCardType = 'regular';
-    let currentChatFan = '';
-
-    window.convertToEmbedUrl = function(url) {
-        if (!url) return '';
-        if (url.includes('youtube.com/watch')) {
-            const videoId = url.split('v=')[1]?.split('&')[0];
-            return videoId ? `https://www.youtube.com/embed/${videoId}` : url;
-        }
-        if (url.includes('youtu.be/')) {
-            const videoId = url.split('youtu.be/')[1]?.split('?')[0];
-            return videoId ? `https://www.youtube.com/embed/${videoId}` : url;
-        }
-        if (url.includes('youtube.com/embed/')) return url;
-        return url;
-    };
-
-    window.switchTab = function(tab) {
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.tab')[tab === 'fans' ? 0 : tab === 'chat' ? 1 : 2].classList.add('active');
-        
-        document.getElementById('fansTab').classList.add('hidden');
-        document.getElementById('chatTab').classList.add('hidden');
-        document.getElementById('videoTab').classList.add('hidden');
-        
-        document.getElementById(tab + 'Tab').classList.remove('hidden');
-        
-        if (tab === 'chat') {
-            updateChatFanList();
-        } else if (tab === 'video') {
-            document.getElementById('videoUrl').value = celeb.video || '';
-            document.getElementById('videoTitle').value = celeb.videoTitle || '';
-            showVideoPreview();
-        }
-    };
-
-    window.selectCardType = function(type) {
-        selectedCardType = type;
-        document.getElementById('regularBtn').classList.remove('active');
-        document.getElementById('goldBtn').classList.remove('active');
-        document.getElementById(type === 'regular' ? 'regularBtn' : 'goldBtn').classList.add('active');
-    };
-
-    function load() {
-        const d = localStorage.getItem('fanData');
-        if (d) {
-            const p = JSON.parse(d);
-            db = p.fans || {};
-            celeb = p.celeb || celeb;
-        }
-        document.getElementById('cname').value = celeb.name;
-        document.getElementById('cphoto').value = celeb.photo;
-    }
-
-    function save() {
-        localStorage.setItem('fanData', JSON.stringify({fans: db, celeb: celeb}));
-    }
-
-    window.doLogin = function() {
-        const p = document.getElementById('pwd').value;
-        if (p === PWD) {
-            localStorage.setItem('loggedIn', 'yes');
-            document.getElementById('loginSection').classList.add('hidden');
-            document.getElementById('adminSection').classList.remove('hidden');
-            load();
-            refresh();
-        } else {
-            document.getElementById('loginMsg').innerHTML = '<div class="message error">❌ Wrong password</div>';
-        }
-    };
-
-    window.doLogout = function() {
-        localStorage.removeItem('loggedIn');
-        location.reload();
-    };
-
-    window.addFan = function() {
-        const fn = document.getElementById('fname').value.trim();
-        const cn = document.getElementById('cname').value.trim();
-        const cp = document.getElementById('cphoto').value.trim();
-        
-        if (!fn) {
-            msg('❌ Enter fan name', 'error');
-            return;
-        }
-        
-        celeb.name = cn;
-        celeb.photo = cp;
-        save();
-        
-        const id = fn.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Date.now();
-        db[id] = {
-            name: fn, 
-            date: new Date().toISOString(),
-            type: selectedCardType
+        const firebaseConfig = {
+            apiKey: "AIzaSyD5Z_YbfJs1LTZVqq8IDLUWakGmj5b96UE",
+            authDomain: "grace-fan-cards.firebaseapp.com",
+            databaseURL: "https://grace-fan-cards-default-rtdb.firebaseio.com",
+            projectId: "grace-fan-cards",
+            storageBucket: "grace-fan-cards.firebasestorage.app",
+            messagingSenderId: "982523155231",
+            appId: "1:982523155231:web:472627226297f11ebb162a"
         };
-        save();
-        
-        const baseUrl = window.location.origin + window.location.pathname.replace('admin.html', 'index.html');
-        const params = new URLSearchParams({
-            name: fn,
-            celeb: cn,
-            photo: cp,
-            type: selectedCardType,
-            fanId: id
-        });
-        const link = baseUrl + '?' + params.toString();
-        
-        navigator.clipboard.writeText(link);
-        const cardTypeName = selectedCardType === 'gold' ? '👑 GOLD VIP' : '💜 Regular';
-        msg('✅ ' + fn + ' registered as ' + cardTypeName + '! Link copied!', 'success');
-        
-        document.getElementById('fname').value = '';
-        selectCardType('regular');
-        refresh();
-    };
 
-    window.saveVideo = function() {
-        const url = document.getElementById('videoUrl').value.trim();
-        celeb.video = convertToEmbedUrl(url);
-        celeb.videoTitle = document.getElementById('videoTitle').value.trim();
-        save();
-        
-        set(ref(database, 'videoSettings'), {
-            url: celeb.video,
-            title: celeb.videoTitle
-        });
-        
-        document.getElementById('videoMsg').innerHTML = '<div class="message success">✅ Video saved! All fans will see it.</div>';
-        setTimeout(() => document.getElementById('videoMsg').innerHTML = '', 5000);
-        showVideoPreview();
-    };
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
 
-    function showVideoPreview() {
-        const previewDiv = document.getElementById('videoPreview');
-        if (celeb.video) {
-            previewDiv.innerHTML = `
-                <h3 style="color:#667eea;margin-bottom:15px;">📺 Preview:</h3>
-                <div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:10px;">
-                    <iframe src="${celeb.video}" frameborder="0" style="position:absolute;top:0;left:0;width:100%;height:100%;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                </div>
-                <p style="margin-top:15px;color:#28a745;font-weight:bold;text-align:center;">✅ Video ready!</p>
-            `;
-        } else {
-            previewDiv.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">No video set</p>';
-        }
-    }
+        const PWD = 'admin123';
+        let db = {};
+        let celeb = {
+            name: 'Grace Charis',
+            photo: 'https://cdn.i-scmp.com/sites/default/files/styles/768x768/public/d8/images/canvas/2025/04/23/e7b3bcfa-41b4-40ac-bff9-a46437a13cd7_8140c932.jpg?itok=a5KQpa_I&v=1745377355',
+            video: '',
+            videoTitle: '🔴 LIVE: Grace\'s Exclusive Fan Update'
+        };
+        let selectedCardType = 'regular';
+        let currentChatFan = '';
 
-    function updateChatFanList() {
-        const select = document.getElementById('chatFanSelect');
-        select.innerHTML = '<option value="">-- Select a fan --</option>';
-        Object.keys(db).forEach(id => {
-            const option = document.createElement('option');
-            option.value = id;
-            option.textContent = db[id].name;
-            select.appendChild(option);
-        });
-    }
-
-    window.loadChat = function() {
-        currentChatFan = document.getElementById('chatFanSelect').value;
-        if (!currentChatFan) return;
-        
-        const chatRef = ref(database, 'chats/' + currentChatFan);
-        onValue(chatRef, (snapshot) => {
-            const messages = [];
-            snapshot.forEach((child) => {
-                messages.push(child.val());
+        // FIXED: Load data from Firebase instead of localStorage
+        function loadFromFirebase() {
+            // Load fans
+            const fansRef = ref(database, 'fans');
+            onValue(fansRef, (snapshot) => {
+                db = snapshot.val() || {};
+                refresh();
             });
+
+            // Load celebrity info
+            const celebRef = ref(database, 'celeb');
+            onValue(celebRef, (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    celeb = data;
+                    document.getElementById('cname').value = celeb.name || 'Grace Charis';
+                    document.getElementById('cphoto').value = celeb.photo || '';
+                }
+            });
+        }
+
+        // FIXED: Save to Firebase instead of localStorage
+        function saveCelebToFirebase() {
+            const celebRef = ref(database, 'celeb');
+            set(celebRef, celeb);
+        }
+
+        window.convertToEmbedUrl = function(url) {
+            if (!url) return '';
+            if (url.includes('youtube.com/watch')) {
+                const videoId = url.split('v=')[1]?.split('&')[0];
+                return videoId ? `https://www.youtube.com/embed/${videoId}` : url;
+            }
+            if (url.includes('youtu.be/')) {
+                const videoId = url.split('youtu.be/')[1]?.split('?')[0];
+                return videoId ? `https://www.youtube.com/embed/${videoId}` : url;
+            }
+            if (url.includes('youtube.com/embed/')) return url;
+            return url;
+        };
+
+        window.switchTab = function(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab')[tab === 'fans' ? 0 : tab === 'chat' ? 1 : 2].classList.add('active');
             
-            const chatWindow = document.getElementById('chatWindow');
-            if (messages.length === 0) {
-                chatWindow.innerHTML = '<p style="text-align:center;color:#666;padding:20px">No messages yet</p>';
+            document.getElementById('fansTab').classList.add('hidden');
+            document.getElementById('chatTab').classList.add('hidden');
+            document.getElementById('videoTab').classList.add('hidden');
+            
+            document.getElementById(tab + 'Tab').classList.remove('hidden');
+            
+            if (tab === 'chat') {
+                updateChatFanList();
+            } else if (tab === 'video') {
+                document.getElementById('videoUrl').value = celeb.video || '';
+                document.getElementById('videoTitle').value = celeb.videoTitle || '';
+                showVideoPreview();
+            }
+        };
+
+        window.selectCardType = function(type) {
+            selectedCardType = type;
+            document.getElementById('regularBtn').classList.remove('active');
+            document.getElementById('goldBtn').classList.remove('active');
+            document.getElementById(type === 'regular' ? 'regularBtn' : 'goldBtn').classList.add('active');
+        };
+
+        window.doLogin = function() {
+            const p = document.getElementById('pwd').value;
+            if (p === PWD) {
+                localStorage.setItem('loggedIn', 'yes');
+                document.getElementById('loginSection').classList.add('hidden');
+                document.getElementById('adminSection').classList.remove('hidden');
+                loadFromFirebase();
+            } else {
+                document.getElementById('loginMsg').innerHTML = '<div class="message error">❌ Wrong password</div>';
+            }
+        };
+
+        window.doLogout = function() {
+            localStorage.removeItem('loggedIn');
+            location.reload();
+        };
+
+        window.addFan = function() {
+            const fn = document.getElementById('fname').value.trim();
+            const cn = document.getElementById('cname').value.trim();
+            const cp = document.getElementById('cphoto').value.trim();
+            
+            if (!fn) {
+                msg('❌ Enter fan name', 'error');
                 return;
             }
             
-            chatWindow.innerHTML = messages.map(m => `
-                <div class="chat-message ${m.from}">
-                    <div class="chat-sender">${m.from === 'fan' ? db[currentChatFan].name : 'Grace Charis'}</div>
-                    <div>${m.text}</div>
-                    <div style="font-size:11px;color:#999;margin-top:5px">${new Date(m.time).toLocaleString()}</div>
-                </div>
-            `).join('');
+            celeb.name = cn;
+            celeb.photo = cp;
+            saveCelebToFirebase();
             
-            chatWindow.scrollTop = chatWindow.scrollHeight;
-        });
-    };
+            const id = fn.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Date.now();
+            const fanData = {
+                name: fn, 
+                date: new Date().toISOString(),
+                type: selectedCardType
+            };
+            
+            // FIXED: Save to Firebase
+            const fanRef = ref(database, 'fans/' + id);
+            set(fanRef, fanData);
+            
+            const baseUrl = window.location.origin + window.location.pathname.replace('admin.html', 'index.html');
+            const params = new URLSearchParams({
+                name: fn,
+                celeb: cn,
+                photo: cp,
+                type: selectedCardType,
+                fanId: id
+            });
+            const link = baseUrl + '?' + params.toString();
+            
+            navigator.clipboard.writeText(link);
+            const cardTypeName = selectedCardType === 'gold' ? '👑 GOLD VIP' : '💜 Regular';
+            msg('✅ ' + fn + ' registered as ' + cardTypeName + '! Link copied!', 'success');
+            
+            document.getElementById('fname').value = '';
+            selectCardType('regular');
+        };
 
-    window.sendAdminMessage = function() {
-        if (!currentChatFan) {
-            alert('Please select a fan first');
-            return;
-        }
-        
-        const text = document.getElementById('adminMessage').value.trim();
-        if (!text) return;
-        
-        const chatRef = ref(database, 'chats/' + currentChatFan);
-        push(chatRef, {
-            from: 'admin',
-            text: text,
-            time: new Date().toISOString()
-        });
-        
-        document.getElementById('adminMessage').value = '';
-    };
+        window.saveVideo = function() {
+            const url = document.getElementById('videoUrl').value.trim();
+            celeb.video = convertToEmbedUrl(url);
+            celeb.videoTitle = document.getElementById('videoTitle').value.trim();
+            saveCelebToFirebase();
+            
+            set(ref(database, 'videoSettings'), {
+                url: celeb.video,
+                title: celeb.videoTitle
+            });
+            
+            document.getElementById('videoMsg').innerHTML = '<div class="message success">✅ Video saved! All fans will see it.</div>';
+            setTimeout(() => document.getElementById('videoMsg').innerHTML = '', 5000);
+            showVideoPreview();
+        };
 
-    function refresh() {
-        const ids = Object.keys(db);
-        document.getElementById('total').textContent = ids.length;
-        
-        const goldFans = ids.filter(i => db[i].type === 'gold').length;
-        document.getElementById('goldCount').textContent = goldFans;
-        
-        const today = new Date().toDateString();
-        const tc = ids.filter(i => new Date(db[i].date).toDateString() === today).length;
-        document.getElementById('today').textContent = tc;
-        
-        if (ids.length === 0) {
-            document.getElementById('list').innerHTML = '<p style="text-align:center;color:#666;padding:30px">No fans yet</p>';
-            return;
-        }
-        
-        const cn = celeb.name;
-        const cp = celeb.photo;
-        
-        document.getElementById('list').innerHTML = '<strong style="display:block;margin-bottom:15px">📋 Fans (' + ids.length + '):</strong>' +
-            ids.reverse().map(i => {
-                const f = db[i];
-                const baseUrl = window.location.origin + window.location.pathname.replace('admin.html', 'index.html');
-                const params = new URLSearchParams({
-                    name: f.name,
-                    celeb: cn,
-                    photo: cp,
-                    type: f.type || 'regular',
-                    fanId: i
-                });
-                const link = baseUrl + '?' + params.toString();
-                const isGold = f.type === 'gold';
-                
-                return `
-                    <div class="user-item ${isGold ? 'gold' : ''}">
-                        <div class="user-name">
-                            ${isGold ? '👑' : '👤'} ${f.name}
-                            ${isGold ? '<span class="gold-badge">GOLD VIP</span>' : ''}
-                        </div>
-                        <div style="font-size:12px;color:#999;margin-bottom:10px">${new Date(f.date).toLocaleString()}</div>
-                        <div class="user-actions">
-                            <button class="view-btn" onclick="window.open('${link}','_blank')">👁️ View</button>
-                            <button class="copy-btn" onclick="copy('${link}',event)">📋 Copy</button>
-                            <button class="delete-btn" onclick="del('${i}')">🗑️ Delete</button>
-                        </div>
+        function showVideoPreview() {
+            const previewDiv = document.getElementById('videoPreview');
+            if (celeb.video) {
+                previewDiv.innerHTML = `
+                    <h3 style="color:#667eea;margin-bottom:15px;">📺 Preview:</h3>
+                    <div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:10px;">
+                        <iframe src="${celeb.video}" frameborder="0" style="position:absolute;top:0;left:0;width:100%;height:100%;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                     </div>
+                    <p style="margin-top:15px;color:#28a745;font-weight:bold;text-align:center;">✅ Video ready!</p>
                 `;
-            }).join('');
-    }
-
-    window.copy = function(link, e) {
-        e.stopPropagation();
-        navigator.clipboard.writeText(link);
-        const btn = e.target;
-        const orig = btn.innerHTML;
-        btn.innerHTML = '✅ Copied!';
-        btn.style.background = '#218838';
-        setTimeout(() => {
-            btn.innerHTML = orig;
-            btn.style.background = '';
-        }, 2000);
-    };
-
-    window.del = function(id) {
-        if (confirm('Delete ' + db[id].name + '?')) {
-            delete db[id];
-            save();
-            refresh();
+            } else {
+                previewDiv.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">No video set</p>';
+            }
         }
-    };
 
-    function msg(text, type) {
-        document.getElementById('msg').innerHTML = '<div class="message ' + type + '">' + text + '</div>';
-        setTimeout(() => document.getElementById('msg').innerHTML = '', 5000);
-    }
-
-    window.onload = function() {
-        if (localStorage.getItem('loggedIn') === 'yes') {
-            document.getElementById('loginSection').classList.add('hidden');
-            document.getElementById('adminSection').classList.remove('hidden');
-            load();
-            refresh();
+        function updateChatFanList() {
+            const select = document.getElementById('chatFanSelect');
+            select.innerHTML = '<option value="">-- Select a fan --</option>';
+            Object.keys(db).forEach(id => {
+                const option = document.createElement('option');
+                option.value = id;
+                option.textContent = db[id].name;
+                select.appendChild(option);
+            });
         }
-    };
-</script>
+
+        window.loadChat = function() {
+            currentChatFan = document.getElementById('chatFanSelect').value;
+            if (!currentChatFan) return;
+            
+            const chatRef = ref(database, 'chats/' + currentChatFan);
+            onValue(chatRef, (snapshot) => {
+                const messages = [];
+                snapshot.forEach((child) => {
+                    messages.push(child.val());
+                });
+                
+                const chatWindow = document.getElementById('chatWindow');
+                if (messages.length === 0) {
+                    chatWindow.innerHTML = '<p style="text-align:center;color:#666;padding:20px">No messages yet</p>';
+                    return;
+                }
+                
+                chatWindow.innerHTML = messages.map(m => `
+                    <div class="chat-message ${m.from}">
+                        <div class="chat-sender">${m.from === 'fan' ? db[currentChatFan].name : 'Grace Charis'}</div>
+                        <div>${m.text}</div>
+                        <div style="font-size:11px;color:#999;margin-top:5px">${new Date(m.time).toLocaleString()}</div>
+                    </div>
+                `).join('');
+                
+                chatWindow.scrollTop = chatWindow.scrollHeight;
+            });
+        };
+
+        window.sendAdminMessage = function() {
+            if (!currentChatFan) {
+                alert('Please select a fan first');
+                return;
+            }
+            
+            const text = document.getElementById('adminMessage').value.trim();
+            if (!text) return;
+            
+            const chatRef = ref(database, 'chats/' + currentChatFan);
+            push(chatRef, {
+                from: 'admin',
+                text: text,
+                time: new Date().toISOString()
+            });
+            
+            document.getElementById('adminMessage').value = '';
+        };
+
+        function refresh() {
+            const ids = Object.keys(db);
+            document.getElementById('total').textContent = ids.length;
+            
+            const goldFans = ids.filter(i => db[i].type === 'gold').length;
+            document.getElementById('goldCount').textContent = goldFans;
+            
+            const today = new Date().toDateString();
+            const tc = ids.filter(i => new Date(db[i].date).toDateString() === today).length;
+            document.getElementById('today').textContent = tc;
+            
+            if (ids.length === 0) {
+                document.getElementById('list').innerHTML = '<p style="text-align:center;color:#666;padding:30px">No fans yet</p>';
+                return;
+            }
+            
+            const cn = celeb.name;
+            const cp = celeb.photo;
+            
+            document.getElementById('list').innerHTML = '<strong style="display:block;margin-bottom:15px">📋 Fans (' + ids.length + '):</strong>' +
+                ids.reverse().map(i => {
+                    const f = db[i];
+                    const baseUrl = window.location.origin + window.location.pathname.replace('admin.html', 'index.html');
+                    const params = new URLSearchParams({
+                        name: f.name,
+                        celeb: cn,
+                        photo: cp,
+                        type: f.type || 'regular',
+                        fanId: i
+                    });
+                    const link = baseUrl + '?' + params.toString();
+                    const isGold = f.type === 'gold';
+                    
+                    return `
+                        <div class="user-item ${isGold ? 'gold' : ''}">
+                            <div class="user-name">
+                                ${isGold ? '👑' : '👤'} ${f.name}
+                                ${isGold ? '<span class="gold-badge">GOLD VIP</span>' : ''}
+                            </div>
+                            <div style="font-size:12px;color:#999;margin-bottom:10px">${new Date(f.date).toLocaleString()}</div>
+                            <div class="user-actions">
+                                <button class="view-btn" onclick="window.open('${link}','_blank')">👁️ View</button>
+                                <button class="copy-btn" onclick="copy('${link}',event)">📋 Copy</button>
+                                <button class="delete-btn" onclick="del('${i}')">🗑️ Delete</button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+        }
+
+        window.copy = function(link, e) {
+            e.stopPropagation();
+            navigator.clipboard.writeText(link);
+            const btn = e.target;
+            const orig = btn.innerHTML;
+            btn.innerHTML = '✅ Copied!';
+            btn.style.background = '#218838';
+            setTimeout(() => {
+                btn.innerHTML = orig;
+                btn.style.background = '';
+            }, 2000);
+        };
+
+        window.del = function(id) {
+            if (confirm('Delete ' + db[id].name + '?')) {
+                // FIXED: Delete from Firebase
+                const fanRef = ref(database, 'fans/' + id);
+                remove(fanRef);
+            }
+        };
+
+        function msg(text, type) {
+            document.getElementById('msg').innerHTML = '<div class="message ' + type + '">' + text + '</div>';
+            setTimeout(() => document.getElementById('msg').innerHTML = '', 5000);
+        }
+
+        window.onload = function() {
+            if (localStorage.getItem('loggedIn') === 'yes') {
+                document.getElementById('loginSection').classList.add('hidden');
+                document.getElementById('adminSection').classList.remove('hidden');
+                loadFromFirebase();
+            }
+        };
+    </script>
 </body>
 </html>
